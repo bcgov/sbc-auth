@@ -14,21 +14,30 @@
 """This module manages API gateway service integrations."""
 
 import re
+from typing import Any
 
 from flask import current_app
 from requests.exceptions import HTTPError
 
 from auth_api.exceptions import BusinessException, Error
+from auth_api.models.dataclass import Activity
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.models.user import User as UserModel
+from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.services.api_terms import ApiTerms as ApiTermsService
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_SANDBOX_USERS, GROUP_API_GW_USERS
+from auth_api.utils.constants import (
+    GROUP_ACCOUNT_HOLDERS,
+    GROUP_API_GW_SANDBOX_USERS,
+    GROUP_API_GW_USERS,
+    MAX_NAMED_API_KEYS,
+)
+from auth_api.utils.enums import ActivityAction
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -71,10 +80,14 @@ class ApiGateway:
             org.save()
         else:
             # Create additional API Key if a consumer exists
+            api_key_payload = {"apiAccess": ["ALL_API"]}
+            if name:
+                cls._check_named_key_limit(org_id)
+                api_key_payload["apiKeyName"] = name
             api_key_response = RestService.post(
                 f"{cls._consumers_url()}/{email}/apikeys",
                 additional_headers={"x-apikey": gw_api_key},
-                data={"apiAccess": ["ALL_API"], "apiKeyName": name},
+                data=api_key_payload,
                 generate_token=False,
             )
             gateway_response = api_key_response.json()
@@ -88,6 +101,14 @@ class ApiGateway:
 
         cls._create_user_and_membership_for_api_user(org_id, env)
         return response
+
+    @classmethod
+    def _check_named_key_limit(cls, org_id: int):
+        """Raise an error if the org already has the maximum number of named keys including revoked keys."""
+        keys = cls.get_api_keys(org_id, skip_auth=True, include_all=True)["consumer"]["consumerKey"]
+        named_key_count = sum(1 for key in keys if cls._get_key_display_name(key))
+        if named_key_count >= MAX_NAMED_API_KEYS:
+            raise BusinessException(Error.API_KEY_NAMED_LIMIT_REACHED, None)
 
     @classmethod
     def _create_user_and_membership_for_api_user(cls, org_id: int, env: str):
@@ -122,7 +143,6 @@ class ApiGateway:
         KeycloakService.add_user_to_group(service_account.get("id"), GROUP_ACCOUNT_HOLDERS)
         org_name = cls._make_string_compatible(org.name)
         branch_name = cls._make_string_compatible(org.branch_name or "BCR")
-        name = cls._make_string_compatible(name)
         # Create a consumer with the keycloak client id and secret
         create_consumer_payload = {
             "email": email,
@@ -132,8 +152,9 @@ class ApiGateway:
             "clientId": client_rep.get("clientId"),
             "clientSecret": client_rep.get("secret"),
             "apiAccess": ["ALL_API"],
-            "apiKeyName": name,
         }
+        if name:
+            create_consumer_payload["apiKeyName"] = cls._make_string_compatible(name)
         api_key_response = RestService.post(
             cls._consumers_url(),
             additional_headers={"x-apikey": gw_api_key},
@@ -147,30 +168,64 @@ class ApiGateway:
         """Revoke api key."""
         current_app.logger.debug("<revoke_key ")
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
-        # Find the environment for this key, based on it consumer changes.
-        email_id: str = None
-        for key in cls.get_api_keys(org_id)["consumer"]["consumerKey"]:
-            if key["apiKey"] == api_key:
-                email_id = key["email"]
-                break
-        if not email_id:
-            raise BusinessException(Error.DATA_NOT_FOUND, Exception())
+        key = cls._find_key(org_id, api_key)
         gw_api_key = current_app.config.get("API_GW_KEY")
 
         RestService.patch(
-            f"{cls._consumers_url()}/{email_id}/apikeys/{api_key}?action=revoke",
+            f"{cls._consumers_url()}/{key['email']}/apikeys/{api_key}?action=revoke",
             additional_headers={"x-apikey": gw_api_key},
             data={},  # send empty payload otherwise gateway will reject it
             generate_token=False,
         )
+        cls._publish_key_activity(ActivityAction.API_KEY_REVOKED.value, org_id, cls._get_key_display_name(key), api_key)
 
     @classmethod
-    def get_api_keys(cls, org_id: int, skip_auth=False) -> list[dict[str, any]]:
-        """Get all api keys."""
+    def delete_api_key(cls, org_id: int, api_key: str):
+        """Permanently delete a revoked api key."""
+        current_app.logger.debug("<delete_api_key ")
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        key = cls._find_key(org_id, api_key, include_all=True)
+        # only revoked keys can be deleted, any other status (e.g. approved, pending) has to be revoked first
+        if key["keyStatus"] != "revoked":
+            raise BusinessException(Error.API_KEY_NOT_REVOKED, None)
+        gw_api_key = current_app.config.get("API_GW_KEY")
+
+        RestService.delete(
+            f"{cls._consumers_url()}/{key['email']}/apikeys/{api_key}",
+            additional_headers={"x-apikey": gw_api_key},
+            data={},
+            generate_token=False,
+        )
+        cls._publish_key_activity(ActivityAction.API_KEY_DELETED.value, org_id, cls._get_key_display_name(key), api_key)
+
+    @classmethod
+    def _find_key(cls, org_id: int, api_key: str, include_all=False) -> dict[str, Any]:
+        """Return the org's key matching api_key, the key has the consumer email it belongs to."""
+        for key in cls.get_api_keys(org_id, skip_auth=True, include_all=include_all)["consumer"]["consumerKey"]:
+            if key["apiKey"] == api_key:
+                return key
+        raise BusinessException(Error.DATA_NOT_FOUND, Exception())
+
+    @staticmethod
+    def _get_key_display_name(key: dict[str, Any]) -> str:
+        """Return the name of the key, empty for a key created without a name (unnamed key)."""
+        return (key.get("apiKeyName") or "").strip()
+
+    @staticmethod
+    def _publish_key_activity(action: str, org_id: int, key_name: str, api_key: str):
+        """Publish an activity log event for the key, the key itself is masked as it's only shown once on create."""
+        ActivityLogPublisher.publish_activity(
+            Activity(org_id=org_id, action=action, name=key_name, value=f"...{api_key[-4:]}")
+        )
+
+    @classmethod
+    def get_api_keys(cls, org_id: int, skip_auth=False, include_all=False) -> dict:
+        """Get approved api keys by default or all (including revoked) via include_all."""
         current_app.logger.debug("<get_api_keys ")
         if skip_auth is False:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
-        api_keys_response = {"consumer": {"consumerKey": []}}
+        # api keys limit are coming from api, for the benefit of defining it in one place
+        api_keys_response = {"consumer": {"consumerKey": []}, "maxNamedKeys": MAX_NAMED_API_KEYS}
         env = current_app.config.get("ENVIRONMENT_NAME")
         email = cls._get_email_id(org_id, env)
         gw_api_key: str = current_app.config.get("API_GW_KEY")
@@ -181,7 +236,7 @@ class ApiGateway:
                 skip_404_logging=True,
             )
             keys = consumers_response.json()["consumer"]["consumerKey"]
-            cls._filter_and_add_keys(api_keys_response, keys, email)
+            cls._filter_and_add_keys(api_keys_response, keys, email, include_all)
         except HTTPError as exc:
             if exc.response.status_code != 404:  # If consumer doesn't exist
                 raise exc
@@ -194,9 +249,9 @@ class ApiGateway:
         return "prod" if env in ("prod", "production") else "sandbox"
 
     @classmethod
-    def _filter_and_add_keys(cls, api_keys_response, keys, email):
+    def _filter_and_add_keys(cls, api_keys_response, keys, email, include_all=False):
         def _add_key_to_response(_key):
-            if _key["keyStatus"] == "approved":
+            if include_all or _key["keyStatus"] == "approved":
                 _key["email"] = email
                 if "environment" in _key:
                     _key["environment"] = cls._normalize_environment(_key["environment"])

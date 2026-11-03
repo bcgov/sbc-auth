@@ -56,11 +56,6 @@
       class="py-4 px-4"
       data-test="api-terms-card"
     >
-      <v-card-title class="flex-column align-center">
-        <h1 class="view-header__title text-center">
-          API Terms of Use for all products
-        </h1>
-      </v-card-title>
       <v-card-text>
         <div
           v-if="isLoading"
@@ -75,6 +70,7 @@
         <!-- eslint-disable-next-line vue/no-v-html -->
         <div
           v-else
+          class="terms-container"
           data-test="api-terms-content"
           v-html="termsContent"
         />
@@ -222,4 +218,20 @@ export default defineComponent({
   }
 }
 
+.terms-container {
+  ::v-deep {
+    section {
+      header {
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+      }
+
+      // document title
+      &:first-child header {
+        text-align: center;
+        font-size: 2rem;
+      }
+    }
+  }
+}
 </style>

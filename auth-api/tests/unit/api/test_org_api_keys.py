@@ -17,19 +17,23 @@
 Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 """
 
+import copy
 import json
 import random
 import uuid
 from http import HTTPStatus
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from requests.exceptions import HTTPError
 from sqlalchemy import text
 
 from auth_api.exceptions.errors import Error
+from auth_api.models.dataclass import Activity
 from auth_api.models.org_api_terms_acceptance import OrgApiTermsAcceptance as OrgApiTermsAcceptanceModel
-from auth_api.utils.enums import DocumentType, PaymentAccountStatus
+from auth_api.services.activity_log_publisher import ActivityLogPublisher
+from auth_api.utils.constants import MAX_NAMED_API_KEYS
+from auth_api.utils.enums import ActivityAction, DocumentType, PaymentAccountStatus
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_document_model, factory_membership_model
 
@@ -81,7 +85,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
                 "consumerKey": [
                     {
                         "apiKey": "test-api-key-123",
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                     }
@@ -101,7 +105,7 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
                 "consumerKey": [
                     {
                         "apiKey": "test-api-key-123",
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                     }
@@ -133,6 +137,79 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
     assert rv.json.get("hasApiAccess")
 
 
+@pytest.mark.parametrize(
+    "named_key_count, payload, expected_status",
+    [
+        (MAX_NAMED_API_KEYS, {"apiKeyName": "Eleventh"}, HTTPStatus.BAD_REQUEST),
+        (MAX_NAMED_API_KEYS, {"keyName": "Eleventh"}, HTTPStatus.BAD_REQUEST),
+        (MAX_NAMED_API_KEYS, {}, HTTPStatus.CREATED),
+        (MAX_NAMED_API_KEYS, {"apiKeyName": ""}, HTTPStatus.CREATED),
+        (MAX_NAMED_API_KEYS - 1, {"apiKeyName": "Tenth"}, HTTPStatus.CREATED),
+    ],
+)
+def test_create_api_key_named_key_limit(
+    client,
+    jwt,
+    session,
+    keycloak_mock,
+    mock_create_payment_settings,
+    monkeypatch,
+    named_key_count,
+    payload,
+    expected_status,
+):  # pylint:disable=unused-argument
+    """Assert that a named key can't be created once the org has the maximum number of named keys."""
+    org_id = random.randint(1000, 999999)
+    set_random_org_id_sequence(session, org_id)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post("/api/v1/users", headers=headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=headers, content_type="application/json"
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    # revoked named keys count toward the limit, a blank name is an unnamed key
+    existing_keys = [
+        {"apiKey": f"key-{i}", "apiKeyName": f"Key {i}", "keyStatus": "approved" if i % 2 else "revoked"}
+        for i in range(named_key_count)
+    ]
+    existing_keys.append({"apiKey": "unnamed-key", "apiKeyName": " ", "keyStatus": "approved"})
+
+    def mock_get(*_args, **_kwargs):
+        mock_response = Mock()
+        mock_response.json.return_value = {"consumer": {"consumerKey": copy.deepcopy(existing_keys)}}
+        mock_response.raise_for_status = lambda: None
+        return mock_response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", mock_get)
+
+    posted_urls = []
+
+    def mock_post(*args, **_kwargs):
+        posted_urls.append(args[0])
+        mock_response = Mock()
+        mock_response.json.return_value = {"apiKey": "new-key", "keyStatus": "approved"}
+        return mock_response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.post", mock_post)
+    # the keycloak client only exists once a consumer is created, which this test skips
+    monkeypatch.setattr(
+        "auth_api.services.api_gateway.ApiGateway._create_user_and_membership_for_api_user",
+        lambda *_args, **_kwargs: None,
+    )
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post(
+        f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json", data=json.dumps(payload)
+    )
+    assert rv.status_code == expected_status
+    if expected_status == HTTPStatus.BAD_REQUEST:
+        assert rv.json["code"] == Error.API_KEY_NAMED_LIMIT_REACHED.name
+        assert not posted_urls
+    else:
+        assert len(posted_urls) == 1
+
+
 def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch):  # pylint:disable=unused-argument
     """Assert that api keys can be listed."""
     org_id = random.randint(1000, 999999)
@@ -154,13 +231,13 @@ def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_
                 "consumerKey": [
                     {
                         "apiKey": "test-api-key-1",
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                     },
                     {
                         "apiKey": "test-api-key-2",
-                        "keyName": "TEST 2",
+                        "apiKeyName": "TEST 2",
                         "keyStatus": "approved",
                         "environment": "dev",
                     },
@@ -180,7 +257,7 @@ def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_
                 "consumerKey": [
                     {
                         "apiKey": "test-api-key-1",
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                     }
@@ -210,6 +287,7 @@ def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_
 
     rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json")
     assert rv.json["consumer"]["consumerKey"]
+    assert rv.json["maxNamedKeys"] == MAX_NAMED_API_KEYS
 
     rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=user_header, content_type="application/json")
     assert rv.json["consumer"]["consumerKey"]
@@ -238,7 +316,7 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
                 "consumerKey": [
                     {
                         "apiKey": test_api_key,
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                         "email": f"{org_id}@test.gov.bc.ca",
@@ -259,7 +337,7 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
                 "consumerKey": [
                     {
                         "apiKey": test_api_key,
-                        "keyName": "TEST",
+                        "apiKeyName": "TEST",
                         "keyStatus": "approved",
                         "environment": "dev",
                     }
@@ -293,8 +371,19 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
     rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json")
     key = rv.json["consumer"]["consumerKey"][0]["apiKey"]
 
-    rv = client.delete(f"/api/v1/orgs/{org_id}/api-keys/{key}", headers=headers, content_type="application/json")
-    assert rv.status_code == 200
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        rv = client.patch(f"/api/v1/orgs/{org_id}/api-keys/{key}", headers=headers, content_type="application/json")
+        assert rv.status_code == 400
+        mock_activity.assert_not_called()
+
+        rv = client.patch(
+            f"/api/v1/orgs/{org_id}/api-keys/{key}?action=revoke", headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == 200
+        # the key is masked in the activity log
+        mock_activity.assert_called_once_with(
+            Activity(org_id=org_id, action=ActivityAction.API_KEY_REVOKED.value, name="TEST", value="...voke")
+        )
 
     # Mock get_api_keys to return empty when revoking invalid key
     def mock_get_invalid(*_args, **_kwargs):
@@ -306,10 +395,133 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock, mock_create_payment
     monkeypatch.setattr("auth_api.services.rest_service.RestService.get", mock_get_invalid)
 
     # Revoke an invalid key
-    rv = client.delete(
-        f"/api/v1/orgs/{org_id}/api-keys/{key}-INVALID", headers=user_headers, content_type="application/json"
-    )
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        rv = client.patch(
+            f"/api/v1/orgs/{org_id}/api-keys/{key}-INVALID?action=revoke",
+            headers=user_headers,
+            content_type="application/json",
+        )
     assert rv.status_code == 404
+    mock_activity.assert_not_called()
+
+
+def test_delete_api_key(client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that only revoked api keys can be deleted."""
+    org_id = random.randint(1000, 999999)
+    set_random_org_id_sequence(session, org_id)
+
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=user_headers, content_type="application/json"
+    )
+    assert rv.json.get("id") == org_id
+
+    def mock_get(*_args, **_kwargs):
+        mock_response = Mock()
+        mock_response.json.return_value = {
+            "consumer": {
+                "consumerKey": [
+                    {"apiKey": "approved-key", "keyStatus": "approved"},
+                    {"apiKey": "pending-key", "keyStatus": "pending"},
+                    {"apiKey": "revoked-key", "keyStatus": "revoked"},
+                ]
+            }
+        }
+        mock_response.raise_for_status = lambda: None
+        return mock_response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", mock_get)
+
+    deleted_urls = []
+
+    def mock_delete(*args, **_kwargs):
+        deleted_urls.append(args[0])
+        return Mock()
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.delete", mock_delete)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        # Active keys have to be revoked first
+        rv = client.delete(
+            f"/api/v1/orgs/{org_id}/api-keys/approved-key", headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == 400
+        assert rv.json["code"] == Error.API_KEY_NOT_REVOKED.name
+        assert rv.json["message"] == Error.API_KEY_NOT_REVOKED.message
+
+        # any status other than revoked can't be deleted either
+        rv = client.delete(
+            f"/api/v1/orgs/{org_id}/api-keys/pending-key", headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == 400
+        assert rv.json["code"] == Error.API_KEY_NOT_REVOKED.name
+
+        rv = client.delete(
+            f"/api/v1/orgs/{org_id}/api-keys/unknown-key", headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == 404
+        assert not deleted_urls
+        mock_activity.assert_not_called()
+
+        rv = client.delete(
+            f"/api/v1/orgs/{org_id}/api-keys/revoked-key", headers=headers, content_type="application/json"
+        )
+        assert rv.status_code == 200
+        assert len(deleted_urls) == 1
+        assert deleted_urls[0].endswith("/apikeys/revoked-key")
+        # a key without a name is logged as an unnamed key
+        mock_activity.assert_called_once_with(
+            Activity(org_id=org_id, action=ActivityAction.API_KEY_DELETED.value, name="", value="...-key")
+        )
+
+
+@pytest.mark.parametrize(
+    "gateway_keys",
+    [
+        [
+            {"apiKey": "approved-key", "keyStatus": "approved"},
+            {"apiKey": "revoked-key", "keyStatus": "revoked"},
+        ],
+        # the gateway returns a single key as an object rather than a list
+        {"apiKey": "revoked-key", "keyStatus": "revoked"},
+    ],
+    ids=["list", "single_dict"],
+)
+def test_list_api_keys_all_param(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, gateway_keys
+):  # pylint:disable=unused-argument
+    """Assert revoked keys are only listed with ?all=true."""
+    org_id = random.randint(1000, 999999)
+    set_random_org_id_sequence(session, org_id)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    client.post("/api/v1/users", headers=user_headers, content_type="application/json")
+    rv = client.post(
+        "/api/v1/orgs", data=json.dumps(TestOrgInfo.org1), headers=user_headers, content_type="application/json"
+    )
+    assert rv.json.get("id") == org_id
+
+    def mock_get(*_args, **_kwargs):
+        mock_response = Mock()
+        mock_response.json.return_value = {"consumer": {"consumerKey": copy.deepcopy(gateway_keys)}}
+        mock_response.raise_for_status = lambda: None
+        return mock_response
+
+    monkeypatch.setattr("auth_api.services.rest_service.RestService.get", mock_get)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    all_keys = [gateway_keys] if isinstance(gateway_keys, dict) else gateway_keys
+    approved = [key["apiKey"] for key in all_keys if key["keyStatus"] == "approved"]
+
+    rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json")
+    assert rv.status_code == 200
+    assert [key["apiKey"] for key in rv.json["consumer"]["consumerKey"]] == approved
+
+    rv = client.get(f"/api/v1/orgs/{org_id}/api-keys?all=true", headers=headers, content_type="application/json")
+    assert rv.status_code == 200
+    assert [key["apiKey"] for key in rv.json["consumer"]["consumerKey"]] == [key["apiKey"] for key in all_keys]
 
 
 _STAFF_SUB = str(uuid.uuid4())
@@ -439,13 +651,11 @@ def test_create_api_key_requires_terms_acceptance(client, jwt, session, keycloak
 @pytest.mark.parametrize(
     "payload",
     [
-        pytest.param({}, id="no_name"),
-        pytest.param({"apiKeyName": ""}, id="empty_name"),
         pytest.param({"apiKeyName": " TEST"}, id="leading_whitespace"),
     ],
 )
 def test_create_api_key_invalid_payload(client, jwt, session, keycloak_mock, mock_create_payment_settings, payload):  # pylint:disable=unused-argument
-    """Assert that a create key payload without a valid key name is rejected by the schema."""
+    """Assert that a create key payload with an invalid key name is rejected by the schema."""
     org_id, headers = _create_org_as_account_holder(client, jwt)
 
     rv = client.post(
