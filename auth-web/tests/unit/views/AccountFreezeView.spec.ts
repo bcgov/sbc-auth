@@ -37,9 +37,6 @@ describe('AccountFreezeView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
-      },
-      computed: {
-        isAccountStatusNsfSuspended: Boolean
       }
     })
   })

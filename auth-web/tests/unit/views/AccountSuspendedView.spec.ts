@@ -74,4 +74,13 @@ describe('AccountSuspendedView.vue', () => {
     'Partnership Office at: Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
     expect(wrapper.find('[data-test="div-is-user"]').exists()).toBeFalsy()
   })
+
+  it('renders without crashing when the admin has no email', async () => {
+    wrapper.destroy()
+    const orgStore = useOrgStore()
+    orgStore.getAccountAdministrator = vi.fn().mockResolvedValue({ user: { contacts: [{}] } })
+    wrapper = shallowMount(AccountSuspendedView, { localVue: createLocalVue(), router, vuetify })
+    await flushPromises()
+    expect(wrapper.find('h1').text()).toBe('Your Account is Suspended')
+  })
 })
