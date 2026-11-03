@@ -20,7 +20,21 @@ from typing import Self
 
 from flask import current_app
 from sql_versioning import Versioned
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, desc, event, func, text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    and_,
+    cast,
+    desc,
+    event,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import contains_eager, relationship
 
@@ -77,6 +91,12 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
         nullable=True,
     )
     is_business_account = Column("is_business_account", Boolean(), default=False)
+    # TODO: validate business_identifier on create/update (not enforced yet):
+    #  - only allow it when is_business_account is True
+    #  - only one ACTIVE org per business_identifier (make ix_orgs_business_identifier a unique partial index
+    #    WHERE business_identifier IS NOT NULL AND status_code = 'ACTIVE', and check status changes to ACTIVE too)
+    # Must reference an existing entity (entities.business_identifier is unique).
+    business_identifier = Column(String(75), ForeignKey("entities.business_identifier"), nullable=True)
 
     contacts = relationship("ContactLink", lazy="select", back_populates="org")
     org_type = relationship("OrgType")
@@ -347,6 +367,15 @@ class Org(Versioned, BaseModel):  # pylint: disable=too-few-public-methods,too-m
             self.save()
         else:
             super().reset()
+
+
+# Partial index: only the few orgs that have an identifier are indexed.
+# Declared outside the class so Versioned doesn't copy it to orgs_history.
+Index(
+    "ix_orgs_business_identifier",
+    Org.business_identifier,
+    postgresql_where=Org.business_identifier.isnot(None),
+)
 
 
 @event.listens_for(Org, "before_insert")

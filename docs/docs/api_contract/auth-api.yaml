@@ -911,6 +911,17 @@ paths:
                   title: Organizational Type
                   example: IMPLICIT
                   pattern: ^(.*)$
+                isBusinessAccount:
+                  type: boolean
+                  title: Is Business Account
+                businessIdentifier:
+                  type: string
+                  nullable: true
+                  minLength: 1
+                  maxLength: 75
+                  title: Business Identifier
+                  description: Business identifier this account represents. Send null to clear it.
+                  example: BC1234567
               required:
                 - name
     get:
@@ -1050,6 +1061,17 @@ paths:
                   title: Organizational Type
                   example: IMPLICIT
                   pattern: ^(.*)$
+                isBusinessAccount:
+                  type: boolean
+                  title: Is Business Account
+                businessIdentifier:
+                  type: string
+                  nullable: true
+                  minLength: 1
+                  maxLength: 75
+                  title: Business Identifier
+                  description: Business identifier this account represents. Send null to clear it.
+                  example: BC1234567
               required:
                 - name
     get:
@@ -3651,6 +3673,13 @@ components:
           type: string
         businessSize:
           type: string
+        isBusinessAccount:
+          type: boolean
+        businessIdentifier:
+          type: string
+          nullable: true
+          description: Business identifier this account represents; null when not set.
+          example: BC1234567
         mailingAddress:
           $ref: '#/components/schemas/contact'
       required:

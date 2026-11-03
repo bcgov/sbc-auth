@@ -1394,3 +1394,23 @@ def test_handle_pay_http_error_known_pay_api_code(app):
     assert exc_info.value.code == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.name
     assert exc_info.value.status_code == HTTPStatus.BAD_REQUEST
     assert exc_info.value.message == Error.CFS_ACCOUNT_SETUP_IN_PROGRESS.message
+
+
+def test_org_business_identifier(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert business identifier must match an entity, and can be set and cleared on an org."""
+    org = factory_org_model(org_info=TestOrgInfo.org1)
+    entity = factory_entity_model()
+
+    def update(org_info):
+        with patch.object(ProductService, "update_org_product_keycloak_groups"):
+            OrgService(org).update_org(org_info)
+
+    with pytest.raises(BusinessException) as exc_info:
+        update({"businessIdentifier": "BC0000000"})
+    assert exc_info.value.code == Error.ORG_BUSINESS_IDENTIFIER_NOT_FOUND.name
+
+    update({"businessIdentifier": entity.business_identifier})
+    assert OrgModel.find_by_org_id(org.id).business_identifier == entity.business_identifier
+
+    update({"businessIdentifier": None})
+    assert OrgModel.find_by_org_id(org.id).business_identifier is None

@@ -116,6 +116,7 @@ class Org:  # pylint: disable=too-many-public-methods
         type_code = org_info.get("typeCode", None)
 
         bcol_profile_flags = None
+        Org._validate_business_identifier(org_info)
         response = Org._validate_and_raise_error(org_info)
         # If the account is created using BCOL credential, verify its valid bc online account
         bcol_details_response = response.get("bcol_response", None)
@@ -401,6 +402,14 @@ class Org:  # pylint: disable=too-many-public-methods
         }
 
     @staticmethod
+    def _validate_business_identifier(org_info: dict):
+        """Ensure a provided businessIdentifier exists in entities (it's an FK)."""
+        if (business_identifier := org_info.get("businessIdentifier")) and not EntityModel.find_by_business_identifier(
+            business_identifier
+        ):
+            raise BusinessException(Error.ORG_BUSINESS_IDENTIFIER_NOT_FOUND, None)
+
+    @staticmethod
     def _validate_and_raise_error(org_info: dict):
         """Execute the validators in chain and raise error or return."""
         validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
@@ -478,6 +487,7 @@ class Org:  # pylint: disable=too-many-public-methods
         has_org_updates: bool = False  # update the org table if this variable is set true
         has_status_changing: bool = False
 
+        Org._validate_business_identifier(org_info)
         org_model: OrgModel = self._model
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
