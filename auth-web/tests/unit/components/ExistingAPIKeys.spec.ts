@@ -253,6 +253,15 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(getOrgApiKeys).toHaveBeenLastCalledWith(123, true)
   })
 
+  it('Should load only approved keys when create api key flag is off, legacy table can only revoke', async () => {
+    vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+    const getOrgApiKeys = useOrgStore().getOrgApiKeys as any
+    wrapper.destroy()
+    wrapper = await wrapperFactory()
+    await flushPromises()
+    expect(getOrgApiKeys).toHaveBeenLastCalledWith(123, false)
+  })
+
   it('Should reload all keys and show the revoke success modal after a revoke', async () => {
     const orgStore = useOrgStore()
     orgStore.revokeOrgApiKeys = vi.fn(() => Promise.resolve({})) as any
@@ -387,7 +396,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
     async function mountWithEligibility (eligibility: () => Promise<any>, isCreateEnabled = true) {
       vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(isCreateEnabled)
-      getApiEligibility.mockImplementation(eligibility)
+      // drop the call from the default mount in beforeEach
+      getApiEligibility.mockClear().mockImplementation(eligibility)
       wrapper.destroy()
       wrapper = await wrapperFactory()
       await flushPromises()
