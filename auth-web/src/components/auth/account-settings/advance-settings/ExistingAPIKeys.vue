@@ -47,7 +47,7 @@
     </v-alert>
 
     <p
-      v-if="isApiKeyListDisplayed"
+      v-if="isApiKeyListDisplayed && isCreateApiKeyEnabled"
       class="mb-6 mt-1"
       data-test="api-key-counts"
     >

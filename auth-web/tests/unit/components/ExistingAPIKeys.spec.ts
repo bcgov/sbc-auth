@@ -415,7 +415,9 @@ describe('Account settings ExistingAPIKeys.vue', () => {
         expect(getApiEligibility.mock.calls).toEqual(isCreateEnabled ? [[123]] : [])
         expect(isDisplayed('api-eligibility-warning')).toBe(warning)
         expect(isDisplayed('create-api-key-button')).toBe(createButton)
-        expect([isDisplayed('api-key-counts'), isDisplayed('api-key-table')]).toEqual([keyList, keyList])
+        // key counts are only shown with the new table (feature flag enabled)
+        expect(isDisplayed('api-key-counts')).toBe(keyList && isCreateEnabled)
+        expect(isDisplayed('api-key-table')).toBe(keyList)
       })
   })
 
