@@ -680,7 +680,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.isLoading = true
     this.apiKeyList = []
     try {
-      const resp = await this.getOrgApiKeys(this.currentOrganization.id, true)
+      // legacy table (when feature flag off) should load only active keys
+      // new table (feature flag on) will load all api keys, active and revoked
+      const shouldShowAllKeys = this.isCreateApiKeyEnabled
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, shouldShowAllKeys)
       this.apiKeyList = resp?.consumer?.consumerKey || []
       this.maxNamedKeys = resp?.maxNamedKeys ?? null
       this.isLoading = false
