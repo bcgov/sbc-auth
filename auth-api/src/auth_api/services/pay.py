@@ -14,7 +14,7 @@
 """Client for the pay-api."""
 
 from flask import current_app
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, RequestException
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
@@ -97,7 +97,12 @@ class PayApi:
     def get_payment_method(org_id: int) -> str | None:
         """Return the org's current payment method from pay-api, None if the org doesn't have a pay account."""
         pay_url = current_app.config.get("PAY_API_URL")
-        token = RestService.get_service_account_token()
+        try:
+            token = RestService.get_service_account_token()
+        except RequestException as exc:
+            # prevent treating 404 as no pay account (not eligible)
+            current_app.logger.error(f"Service account token request failed for org {org_id} pay account lookup")
+            raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
         try:
             response = RestService.get(
                 endpoint=f"{pay_url}/accounts/{org_id}",
