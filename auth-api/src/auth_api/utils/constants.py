@@ -60,4 +60,4 @@ BCOL_PROFILE_PRODUCT_MAP = {
 MAX_NAMED_API_KEYS = 10
 
 # payment methods to be eligible for api access
-API_ELIGIBLE_PAYMENT_METHODS = (PaymentMethod.PAD.value, PaymentMethod.CREDIT_CARD.value)
+API_ELIGIBLE_PAYMENT_METHODS = (PaymentMethod.PAD.value,)
