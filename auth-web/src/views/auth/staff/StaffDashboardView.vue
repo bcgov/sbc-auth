@@ -386,7 +386,6 @@ export default defineComponent({
     const businessStore = useBusinessStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
-    const currentOrganization = computed(() => orgStore.currentOrganization)
     const currentUser = computed(() => userStore.currentUser)
 
     const searchIdentifierRules = [
@@ -423,7 +422,7 @@ export default defineComponent({
 
     const goToInvoluntaryDissolution = () => root.$router.push(`/staff/involuntary-dissolution`)
 
-    const goToManageBusiness = () => root.$router.push(`/account/${currentOrganization.value?.id}/business`)
+    const goToManageBusiness = () => root.$router.push(`/account/${orgStore.currentAccountSettings?.id}/business`)
 
     const launchTileConfig: Array<LaunchTileConfigIF> = [
       {
