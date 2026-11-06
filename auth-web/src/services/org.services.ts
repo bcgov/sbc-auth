@@ -19,6 +19,7 @@ import {
 } from '@/models/Organization'
 
 import { Address } from '@/models/address'
+import { ApiEligibility } from '@/models/ApiEligibility'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
@@ -205,6 +206,10 @@ export default class OrgService {
 
   public static async getApiTermsStatus (orgId: number): Promise<AxiosResponse<ApiTermsStatus>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/terms`)
+  }
+
+  public static async getApiEligibility (orgId: number): Promise<AxiosResponse<ApiEligibility>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/eligibility`)
   }
 
   public static async acceptApiTerms (orgId: number, versionId: string): Promise<AxiosResponse<ApiTermsStatus>> {

@@ -42,6 +42,7 @@ import { StatementFilterParams, StatementNotificationSettings, StatementSettings
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
+import { ApiEligibility } from '@/models/ApiEligibility'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import { AutoCompleteResponse } from '@/models/AutoComplete'
 import BcolService from '@/services/bcol.services'
@@ -1054,6 +1055,11 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
+  async function getApiEligibility (orgId: number): Promise<ApiEligibility> {
+    const response = await OrgService.getApiEligibility(orgId)
+    return response?.data
+  }
+
   async function acceptApiTerms (orgId: number, versionId: string): Promise<ApiTermsStatus> {
     const response = await OrgService.acceptApiTerms(orgId, versionId)
     return response?.data
@@ -1195,6 +1201,7 @@ export const useOrgStore = defineStore('org', () => {
     revokeOrgApiKeys,
     deleteOrgApiKey,
     getApiTermsStatus,
+    getApiEligibility,
     acceptApiTerms,
     updateOrganizationAccessType,
     $reset,

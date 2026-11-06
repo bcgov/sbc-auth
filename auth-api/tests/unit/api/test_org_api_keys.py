@@ -25,6 +25,7 @@ from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
+from flask import current_app
 from requests.exceptions import HTTPError
 from sqlalchemy import text
 
@@ -116,11 +117,6 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
         return mock_response
 
     monkeypatch.setattr("auth_api.services.rest_service.RestService.post", mock_post)
-
-    def get_pay_account_mock(_org, _user):
-        return {"paymentMethod": "PAD"}
-
-    monkeypatch.setattr("auth_api.services.api_gateway.ApiGateway._get_pay_account", get_pay_account_mock)
 
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -668,3 +664,118 @@ def test_create_api_key_invalid_payload(client, jwt, session, keycloak_mock, moc
     assert rv.status_code == HTTPStatus.BAD_REQUEST
     # schema errors have no code, unlike the terms check which also returns 400
     assert "code" not in rv.json
+
+
+def _mock_pay_account(monkeypatch, payment_method=None, status_code=HTTPStatus.OK):
+    """Mock pay-api account lookup and prod env for api eligibility."""
+    monkeypatch.setitem(current_app.config, "ENVIRONMENT_NAME", "prod")
+    monkeypatch.setattr("auth_api.services.pay.RestService.get_service_account_token", lambda: "token")
+
+    def mock_get(*_args, **_kwargs):
+        if status_code != HTTPStatus.OK:
+            raise HTTPError(response=Mock(status_code=status_code))
+        return Mock(json=Mock(return_value={"paymentMethod": payment_method}))
+
+    monkeypatch.setattr("auth_api.services.pay.RestService.get", mock_get)
+
+
+def _get_eligibility(client, org_id, headers):
+    return client.get(f"/api/v1/orgs/{org_id}/api-keys/eligibility", headers=headers, content_type="application/json")
+
+
+@pytest.mark.parametrize("payment_method", ["PAD", "CC"])
+def test_get_api_eligibility_eligible(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, payment_method
+):  # pylint:disable=unused-argument
+    """Assert that an active account with payment method that's allowed is eligible for api service."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    _mock_pay_account(monkeypatch, payment_method)
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json == {
+        "isApiEligible": True,
+        "isAccountActive": True,
+        "isPaymentMethodValid": True,
+        "paymentMethod": payment_method,
+    }
+
+
+def test_get_api_eligibility_ineligible_method(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that an account with payment method that's not allowed is not eligible for api service."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    _mock_pay_account(monkeypatch, "EJV")
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json == {
+        "isApiEligible": False,
+        "isAccountActive": True,
+        "isPaymentMethodValid": False,
+        "paymentMethod": "EJV",
+    }
+
+
+def test_get_api_eligibility_no_pay_account(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that an account without a pay account is not eligible."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    _mock_pay_account(monkeypatch, status_code=HTTPStatus.NOT_FOUND)
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json == {
+        "isApiEligible": False,
+        "isAccountActive": True,
+        "isPaymentMethodValid": False,
+        "paymentMethod": None,
+    }
+
+
+@pytest.mark.parametrize(
+    "pay_status_code, expected_error",
+    [
+        (HTTPStatus.SERVICE_UNAVAILABLE, Error.SERVICE_UNAVAILABLE),
+        (HTTPStatus.INTERNAL_SERVER_ERROR, Error.SERVICE_UNAVAILABLE),
+        (HTTPStatus.UNAUTHORIZED, Error.PAY_ACCOUNT_FETCH_FAILED),
+        (HTTPStatus.FORBIDDEN, Error.PAY_ACCOUNT_FETCH_FAILED),
+    ],
+)
+def test_get_api_eligibility_pay_api_error(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, pay_status_code, expected_error
+):  # pylint:disable=unused-argument
+    """Assert that a pay-api failure is reported as an error rather than not eligible."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    _mock_pay_account(monkeypatch, status_code=pay_status_code)
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == expected_error.status_code
+    assert rv.json["code"] == expected_error.name
+
+
+def test_get_api_eligibility_not_enforced_in_sandbox(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch
+):  # pylint:disable=unused-argument
+    """Assert that any account is eligible outside prod, without calling pay-api."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    monkeypatch.setitem(current_app.config, "ENVIRONMENT_NAME", "sandbox")
+    pay_get = Mock()
+    monkeypatch.setattr("auth_api.services.pay.RestService.get", pay_get)
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json == {
+        "isApiEligible": True,
+        "isAccountActive": True,
+        "isPaymentMethodValid": None,
+        "paymentMethod": None,
+    }
+    pay_get.assert_not_called()

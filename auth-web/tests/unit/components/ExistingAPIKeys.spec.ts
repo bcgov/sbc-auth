@@ -28,6 +28,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   let wrapperFactory: any
   let createOrgApiKey: any
   let getApiTermsStatus: any
+  let getApiEligibility: any
   let router: VueRouter
 
   const $t = () => 'test trans data'
@@ -49,6 +50,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     orgStore.createOrgApiKey = createOrgApiKey as any
     getApiTermsStatus = vi.fn(() => Promise.resolve({ isAccepted: true }))
     orgStore.getApiTermsStatus = getApiTermsStatus as any
+    getApiEligibility = vi.fn(() => Promise.resolve({ isApiEligible: true }))
+    orgStore.getApiEligibility = getApiEligibility as any
     orgStore.currentOrganization = {
       id: 123,
       name: 'test org'
@@ -56,7 +59,12 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
     // params that aren't in the path are only kept when navigating to a named route
     wrapperFactory = async (routeParams = {}) => {
-      router = new VueRouter({ routes: [{ name: 'developer-access', path: '/developer-access' }] })
+      router = new VueRouter({
+        routes: [
+          { name: 'developer-access', path: '/developer-access' },
+          { name: 'product-settings', path: '/product-settings' }
+        ]
+      })
       await router.push({ name: 'developer-access', params: routeParams })
       vi.spyOn(router, 'push').mockImplementation(() => Promise.resolve() as any)
       return mount(ExistingAPIKeys, {
@@ -245,6 +253,15 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(getOrgApiKeys).toHaveBeenLastCalledWith(123, true)
   })
 
+  it('Should load only approved keys when create api key flag is off, legacy table can only revoke', async () => {
+    vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(false)
+    const getOrgApiKeys = useOrgStore().getOrgApiKeys as any
+    wrapper.destroy()
+    wrapper = await wrapperFactory()
+    await flushPromises()
+    expect(getOrgApiKeys).toHaveBeenLastCalledWith(123, false)
+  })
+
   it('Should reload all keys and show the revoke success modal after a revoke', async () => {
     const orgStore = useOrgStore()
     orgStore.revokeOrgApiKeys = vi.fn(() => Promise.resolve({})) as any
@@ -372,6 +389,36 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
     expect(wrapper.vm.confirmationModal).toBeCalled()
     expect(wrapper.find("[data-test='confirmation-modal']").exists()).toBe(true)
+  })
+
+  describe('API access eligibility', () => {
+    const isDisplayed = (dataTest: string) => wrapper.find(`[data-test="${dataTest}"]`).exists()
+
+    async function mountWithEligibility (eligibility: () => Promise<any>, isCreateEnabled = true) {
+      vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(isCreateEnabled)
+      // drop the call from the default mount in beforeEach
+      getApiEligibility.mockClear().mockImplementation(eligibility)
+      wrapper.destroy()
+      wrapper = await wrapperFactory()
+      await flushPromises()
+    }
+
+    it.each([
+      ['not eligible', () => Promise.resolve({ isApiEligible: false }), true, true, false, false],
+      ['eligible', () => Promise.resolve({ isApiEligible: true }), true, false, true, true],
+      ['check failed', () => Promise.reject(new Error('eligibility failed')), true, false, false, true],
+      ['creating keys disabled', () => Promise.resolve({ isApiEligible: false }), false, false, false, true]
+    ])('Should show the right warning, Create Key and key list when %s',
+      async (_, eligibility, isCreateEnabled, warning, createButton, keyList) => {
+        await mountWithEligibility(eligibility, isCreateEnabled)
+
+        expect(getApiEligibility.mock.calls).toEqual(isCreateEnabled ? [[123]] : [])
+        expect(isDisplayed('api-eligibility-warning')).toBe(warning)
+        expect(isDisplayed('create-api-key-button')).toBe(createButton)
+        // key counts are only shown with the new table (feature flag enabled)
+        expect(isDisplayed('api-key-counts')).toBe(keyList && isCreateEnabled)
+        expect(isDisplayed('api-key-table')).toBe(keyList)
+      })
   })
 
   const apiTermsRoute = { name: 'api-terms-of-use', params: { orgId: '123' } }
@@ -505,12 +552,14 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   // the terms page routes back with openCreateKey after the terms are accepted
   it.each([
-    [true, { openCreateKey: 'true' }, true],
-    [true, {}, false],
-    [false, { openCreateKey: 'true' }, false]
-  ])('With creating keys enabled %s and route params %j, the create key form opens on load: %s',
-    async (enabled, routeParams, opens) => {
+    [true, true, { openCreateKey: 'true' }, true],
+    [true, true, {}, false],
+    [false, true, { openCreateKey: 'true' }, false],
+    [true, false, { openCreateKey: 'true' }, false]
+  ])('With creating keys enabled %s, eligible %s and route params %j, the create key form opens on load: %s',
+    async (enabled, isApiEligible, routeParams, opens) => {
       vi.spyOn(LaunchDarklyService, 'getFlag').mockReturnValue(enabled)
+      getApiEligibility.mockResolvedValue({ isApiEligible })
       wrapper.destroy()
       wrapper = await wrapperFactory(routeParams)
       await flushPromises()
@@ -557,6 +606,22 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
     expect(wrapper.find('[data-test="confirm-button-api-key-1"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="confirm-button-api-key-2"]').exists()).toBe(true)
+  })
+
+  it.each([
+    ['API_ACCESS_NOT_ELIGIBLE', 'Account is not eligible for API access.', false],
+    ['SERVICE_UNAVAILABLE', '3rd party application unavailable', true]
+  ])('Should show the %s error message when creating a key fails', async (code, message, isApiEligible) => {
+    mockModals()
+    wrapper.vm.isApiEligible = true
+    createOrgApiKey.mockRejectedValue({ response: { data: { code, message } } })
+
+    await wrapper.vm.onCreateKey({ apiKeyName: 'key1' })
+
+    expect(wrapper.vm.alertTitle).toBe('Unable to Create API Key')
+    expect(wrapper.vm.alertText).toBe(message)
+    expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
+    expect(wrapper.vm.isApiEligible).toBe(isApiEligible)
   })
 
   describe('when the named key limit is reached on create', () => {

@@ -29,15 +29,17 @@ from auth_api.services.api_terms import ApiTerms as ApiTermsService
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
+from auth_api.services.pay import PayApi
 from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import (
+    API_ELIGIBLE_PAYMENT_METHODS,
     GROUP_ACCOUNT_HOLDERS,
     GROUP_API_GW_SANDBOX_USERS,
     GROUP_API_GW_USERS,
     MAX_NAMED_API_KEYS,
 )
-from auth_api.utils.enums import ActivityAction
+from auth_api.utils.enums import ActivityAction, OrgStatus
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -62,15 +64,21 @@ class ApiGateway:
         """
         current_app.logger.debug("<create_key ")
         user_from_context: UserContext = kwargs["user_context"]
-        if not user_from_context.is_system():
+        env = current_app.config.get("ENVIRONMENT_NAME")
+        is_system = user_from_context.is_system()
+        if not is_system:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
             # system callers don't go through the UI terms page, so the terms are only enforced for UI users
             if not ApiTermsService.is_latest_accepted(org_id):
                 raise BusinessException(Error.API_TERMS_NOT_ACCEPTED, None)
-        env = current_app.config.get("ENVIRONMENT_NAME")
+        org: OrgModel = OrgModel.find_by_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # eligibility is only enforced for users creating api keys (skipped for system callers)
+        if not is_system and not cls._eligibility(org)["isApiEligible"]:
+            raise BusinessException(Error.API_ACCESS_NOT_ELIGIBLE, None)
         # accept keyName (deprecated) for existing callers
         name = request_json.get("apiKeyName") or request_json.get("keyName")
-        org: OrgModel = OrgModel.find_by_id(org_id)
         # first find if there is a consumer created for this account.
         gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org_id, env)
@@ -299,11 +307,32 @@ class ApiGateway:
         return True
 
     @classmethod
-    def _get_pay_account(cls, org, user):
-        """Get the payment account for the org."""
-        pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
-        pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
-        return pay_account
+    def get_eligibility(cls, org_id: int) -> dict:
+        """Return whether the org is eligible for api access."""
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        org: OrgModel = OrgModel.find_by_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        return cls._eligibility(org)
+
+    @classmethod
+    def _eligibility(cls, org: OrgModel) -> dict:
+        """Return the org's eligibility, it has to be active and use one of the eligible payment methods."""
+        is_account_active = org.status_code == OrgStatus.ACTIVE.value
+        if cls._normalize_environment(current_app.config.get("ENVIRONMENT_NAME")) != "prod":
+            # in sandbox - check only for active account
+            is_api_eligible, payment_method, is_payment_method_valid = is_account_active, None, None
+        else:
+            # in prod - check all criteria
+            payment_method = PayApi.get_payment_method(org.id)
+            is_payment_method_valid = payment_method in API_ELIGIBLE_PAYMENT_METHODS
+            is_api_eligible = is_account_active and is_payment_method_valid
+        return {
+            "isApiEligible": is_api_eligible,
+            "isAccountActive": is_account_active,
+            "isPaymentMethodValid": is_payment_method_valid,
+            "paymentMethod": payment_method,
+        }
 
     @classmethod
     def _make_string_compatible(cls, target: str) -> str:

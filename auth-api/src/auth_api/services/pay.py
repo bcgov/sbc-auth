@@ -14,7 +14,9 @@
 """Client for the pay-api."""
 
 from flask import current_app
+from requests.exceptions import HTTPError, RequestException
 
+from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.services.rest_service import RestService
@@ -90,3 +92,32 @@ class PayApi:
             return []
 
         return account_fees
+
+    @staticmethod
+    def get_payment_method(org_id: int) -> str | None:
+        """Return the org's current payment method from pay-api, None if the org doesn't have a pay account."""
+        pay_url = current_app.config.get("PAY_API_URL")
+        try:
+            token = RestService.get_service_account_token()
+        except RequestException as exc:
+            # prevent treating 404 as no pay account (not eligible)
+            current_app.logger.error(f"Service account token request failed for org {org_id} pay account lookup")
+            raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
+        try:
+            response = RestService.get(
+                endpoint=f"{pay_url}/accounts/{org_id}",
+                token=token,
+                skip_404_logging=True
+            )
+        except HTTPError as exc:
+            status_code = exc.response.status_code if exc.response is not None else None
+            if status_code == 404:
+                return None
+            if status_code is None or status_code >= 500:
+                raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
+            current_app.logger.error(f"Pay account lookup failed for org {org_id} with status code {status_code}")
+            raise BusinessException(Error.PAY_ACCOUNT_FETCH_FAILED, exc) from exc
+        except ServiceUnavailableException as exc:
+            # raised so a pay-api outage isn't reported as not eligible
+            raise BusinessException(Error.SERVICE_UNAVAILABLE, exc) from exc
+        return response.json().get("paymentMethod")

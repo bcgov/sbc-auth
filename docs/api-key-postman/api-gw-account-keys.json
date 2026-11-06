@@ -109,6 +109,57 @@
 			"response": []
 		},
 		{
+			"name": "Get API Eligibility",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"eligibility fields are returned\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.isApiEligible).to.be.a('boolean');",
+							"    pm.expect(jsonData.isAccountActive).to.be.a('boolean');",
+							"    pm.expect(jsonData.isPaymentMethodValid).to.be.a('boolean');",
+							"    pm.expect(jsonData).to.have.property('paymentMethod');",
+							"    pm.expect(jsonData.isApiEligible).to.eql(jsonData.isAccountActive && jsonData.isPaymentMethodValid);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{auth-api-base-url}}/api/v1/orgs/{{account-id}}/api-keys/eligibility",
+					"host": [
+						"{{auth-api-base-url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{account-id}}",
+						"api-keys",
+						"eligibility"
+					]
+				},
+				"description": "Get the account's API access eligibility"
+			},
+			"response": []
+		},
+		{
 			"name": "Revoke API Key",
 			"event": [
 				{
