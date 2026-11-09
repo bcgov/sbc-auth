@@ -288,6 +288,8 @@ def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_
     rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json")
     assert rv.json["consumer"]["consumerKey"]
     assert rv.json["maxNamedKeys"] == MAX_NAMED_API_KEYS
+    # the test config uses a non-prod ENVIRONMENT_NAME
+    assert rv.json["environment"] == "sandbox"
 
     rv = client.get(f"/api/v1/orgs/{org_id}/api-keys", headers=user_header, content_type="application/json")
     assert rv.json["consumer"]["consumerKey"]
