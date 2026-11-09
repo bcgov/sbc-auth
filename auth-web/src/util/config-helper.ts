@@ -160,6 +160,10 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_PAY_WEB_URL}`
   }
 
+  static getPayInsightsUrl () {
+    return `${import.meta.env.VUE_APP_PAY_INSIGHTS_URL}`
+  }
+
   static getPPRWebUrl () {
     return `${import.meta.env.VUE_APP_PPR_WEB_URL}`
   }

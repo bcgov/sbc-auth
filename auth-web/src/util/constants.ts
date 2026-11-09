@@ -500,6 +500,7 @@ export enum LDFlags {
     EnableAffiliationDelegation = 'enable-affiliation-delegation',
     EnableEFTBalanceByPAD = 'enable-eft-balance-by-pad',
     EnableDRSLookup = 'enable-drs-lookup', // Document Record Services
+    EnablePayInsights = 'enable-pay-insights',
     HideBCOLProductSettings = 'hide-bcol-product-settings',
     EnablePricelistFooter = 'enable-pricelist',
     EnableReceiptDownloadForRefunds = 'enable-receipt-download-refund'

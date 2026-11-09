@@ -362,6 +362,8 @@ interface StaffDashboardViewI {
   registrySearchUrl: ComputedRef<string>
   showDrsTile: ComputedRef<boolean>
   documentsUiUrl: string
+  showPayInsightsTile: ComputedRef<boolean>
+  payInsightsUrl: string
   showInvoluntaryDissolutionTile: ComputedRef<boolean>
 }
 
@@ -407,12 +409,16 @@ export default defineComponent({
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl()),
       documentsUiUrl: computed((): string => ConfigHelper.getBcrosDocumentsUiURL()),
+      payInsightsUrl: computed((): string => ConfigHelper.getPayInsightsUrl()),
       searchActive: false,
       searchedIdentifierNumber: '',
       showBusSearchlink: computed((): boolean => true),
       showInvoluntaryDissolutionTile: computed((): boolean =>
         LaunchDarklyService.getFlag(LDFlags.EnableInvoluntaryDissolution) || false),
       showDrsTile: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableDRSLookup) || false),
+      showPayInsightsTile: computed((): boolean =>
+        (LaunchDarklyService.getFlag(LDFlags.EnablePayInsights) || false) &&
+        currentUser.value?.roles?.includes(Role.Staff)),
       canViewAllProductsLauncher: computed((): boolean =>
         orgStore.permissions.includes(Permission.VIEW_ALL_PRODUCTS_LAUNCHER) || false
       )
@@ -432,6 +438,14 @@ export default defineComponent({
         description: 'Set up and manage automation for Involuntary Dissolution of businesses',
         action: () => { goToInvoluntaryDissolution() },
         actionLabel: 'Manage Involuntary Dissolution'
+      },
+      {
+        showTile: localVars.showPayInsightsTile,
+        image: 'icon-pay-insights.svg',
+        title: 'PAY Insights',
+        description: 'View read-only operational reports for PAY.',
+        href: localVars.payInsightsUrl,
+        actionLabel: 'Open'
       },
       {
         showTile: localVars.showDrsTile,
