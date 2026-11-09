@@ -15,6 +15,7 @@ import {
   AccountFee,
   AddUserBody,
   AddUsersToOrgBody,
+  ApiKeyEnvironment,
   BulkUsersFailed,
   BulkUsersSuccess,
   CFSAccountDetails,
@@ -23,6 +24,7 @@ import {
   GLInfo,
   Member,
   MembershipType,
+  OrgApiKeysResponse,
   OrgBusinessType,
   OrgPaymentDetails,
   OrgProduct,
@@ -99,7 +101,8 @@ export const useOrgStore = defineStore('org', () => {
     originAccessType: undefined as string,
     createGovmOrgId: -1,
     hasPaymentMethodChanged: false,
-    selectedPaymentMethod: null
+    selectedPaymentMethod: null,
+    apiKeysEnvironment: '' as ApiKeyEnvironment | ''
   })
 
   function $reset () {
@@ -137,6 +140,7 @@ export const useOrgStore = defineStore('org', () => {
     state.originAccessType = undefined as string
     state.createGovmOrgId = -1
     state.hasPaymentMethodChanged = false
+    state.apiKeysEnvironment = ''
   }
 
   /** Is True if the current account is premium. */
@@ -1029,8 +1033,9 @@ export const useOrgStore = defineStore('org', () => {
     }
   }
 
-  async function getOrgApiKeys (orgId, all = false) {
+  async function getOrgApiKeys (orgId, all = false): Promise<Partial<OrgApiKeysResponse>> {
     const response = await OrgService.getOrgApiKeys(orgId, all)
+    if (response?.data?.environment) state.apiKeysEnvironment = response.data.environment
     return response?.data || {}
   }
 
@@ -1038,6 +1043,12 @@ export const useOrgStore = defineStore('org', () => {
     const response = await OrgService.createOrgApiKey(orgId, payload)
     return response?.data
   }
+
+  // display label of the API keys environment or empty if not known
+  const apiKeysEnvironmentLabel = computed<string>(() => {
+    if (state.apiKeysEnvironment === 'prod') return 'Production'
+    return state.apiKeysEnvironment === 'sandbox' ? 'Sandbox' : ''
+  })
 
   async function revokeOrgApiKeys (ApiDetails) {
     const response = await OrgService.revokeOrgApiKeys(ApiDetails)
@@ -1101,6 +1112,7 @@ export const useOrgStore = defineStore('org', () => {
 
   return {
     ...toRefs(state),
+    apiKeysEnvironmentLabel,
     isPremiumAccount,
     needMissingBusinessDetailsRedirect,
     canEditBusinessInfo,

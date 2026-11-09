@@ -354,3 +354,24 @@ export enum OrgAccountTypes {
   SBC_STAFF = 'Service BC Staff',
   MAXIMUS_STAFF = 'Maximus Staff'
 }
+
+export type ApiKeyEnvironment = 'prod' | 'sandbox'
+
+export interface ApiKey {
+  apiAccess: string[]
+  apiKey: string
+  apiKeyName?: string // unnamed keys have no name
+  email: string
+  environment: ApiKeyEnvironment
+  keyCreatedDate: string
+  keyExpiryDate: string
+  keyStatus: string // 'approved', 'revoked', etc
+}
+
+export interface OrgApiKeysResponse {
+  consumer: {
+    consumerKey: ApiKey[]
+  }
+  environment: ApiKeyEnvironment
+  maxNamedKeys: number
+}
