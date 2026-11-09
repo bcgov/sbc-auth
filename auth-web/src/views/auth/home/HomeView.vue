@@ -283,6 +283,10 @@ export default class HomeView extends Vue {
   }
 
   // Hero Banner
+  // Image width that keeps its artwork clear of the heading and buttons: the left 34% of the file is white space,
+  // so the remaining 66% has to fit in the space beside the heading
+  $hero-image-fit-width: calc((100% - 43rem) / 0.66);
+
   .hero-banner {
     color: $gray9;
     background-color: #ffffff;
@@ -320,55 +324,43 @@ export default class HomeView extends Vue {
     }
   }
 
-  @media only screen and (max-width: 640px) {
+  @media only screen and (max-width: 959px) {
     .hero-banner {
       background-image: none;
-    }
-  }
-
-  // Below lg: anchor the image's left edge beside the text column and let the right side run
-  // off-screen, so the image never slides under the buttons as the viewport narrows.
-  @media (min-width: 641px) and (max-width: 1263px) {
-    .hero-banner {
-      background-size: 900px;
-      background-position: left max(360px, calc(50% + 360px)) bottom 0;
-    }
-
-    .hero-banner.auth {
-      background-size: 1100px;
-      background-position: left max(360px, calc(50% + 460px)) bottom 0;
     }
   }
 
   @media (min-width: 960px) {
     .hero-banner {
       height: 30rem;
+      background-size: min(900px, $hero-image-fit-width) auto;
     }
 
     .hero-banner.auth {
       height: 38rem;
+      background-size: min(1100px, $hero-image-fit-width) auto;
     }
   }
 
-  @media (min-width: 1264px) {
+  @media (min-width: 1200px) {
     .hero-banner {
       height: 30rem;
-      background-size: 900px;
+      background-size: min(900px, $hero-image-fit-width) auto;
     }
 
     .hero-banner.auth {
       height: 38rem;
-      background-size: 1100px;
+      background-size: min(1100px, $hero-image-fit-width) auto;
     }
   }
 
   @media (min-width: 1264px) and (min-height: 900px) {
     .hero-banner {
-      background-size: 950px;
+      background-size: min(950px, $hero-image-fit-width) auto;
     }
 
     .hero-banner.auth {
-      background-size: 1150px;
+      background-size: min(1150px, $hero-image-fit-width) auto;
     }
   }
 
