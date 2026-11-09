@@ -100,8 +100,17 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find(ExistingAPIKeys).exists()).toBe(true)
   })
 
-  it('renders proper header ', () => {
-    expect(wrapper.find('h2').text()).toBe('API Keys')
+  it.each([
+    [true, '', 'API Keys'],
+    [true, 'sandbox', 'Sandbox API Keys'],
+    [true, 'prod', 'Production API Keys'],
+    [false, 'prod', 'API Keys']
+  ])('with EnableCreateApiKey %s and environment "%s" renders the header %s', async (flag, environment, title) => {
+    wrapper.destroy()
+    vi.mocked(LaunchDarklyService.getFlag).mockReturnValue(flag)
+    useOrgStore().apiKeysEnvironment = environment as any
+    wrapper = await wrapperFactory()
+    expect(wrapper.find('[data-test="api-keys-title"]').text()).toBe(title)
   })
 
   const namedKeys = (count: number) => Array.from({ length: count }, (_, i) => ({
@@ -276,7 +285,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.vm.$refs.confirmActionDialog.close).toHaveBeenCalled()
     expect(wrapper.vm.alertTitle).toBe('Unable to Revoke API Key')
     expect(wrapper.vm.alertKeyName).toBe('key1')
-    expect(wrapper.vm.alertText).toBe('The API key could not be revoked at this time. Please try again.')
+    expect(wrapper.vm.alertTextPrefix).toBe('The API Key:')
+    expect(wrapper.vm.alertText).toBe('could not be revoked at this time. Please try again.')
     expect(wrapper.vm.notificationColor).toBe('error')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
     expect(wrapper.vm.$refs.revokeSuccessDialog.open).not.toHaveBeenCalled()
@@ -312,6 +322,12 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     keyStatus: 'approved'
   }
 
+  it('labels the created key with the same environment as the header', async () => {
+    useOrgStore().apiKeysEnvironment = 'prod'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent({ name: 'CreateApiKeySuccessModal' }).props('environmentLabel')).toBe('Production')
+  })
+
   it('Should show the created key when the response is the created key in a list', async () => {
     await wrapper.vm.loadApiKeys()
     mockModals()
@@ -321,7 +337,6 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     await wrapper.vm.onCreateKey({ apiKeyName: 'test2', environment: 'sandbox' })
 
     expect(wrapper.vm.generatedApiKey).toBe(createdKey.apiKey)
-    expect(wrapper.vm.createdKeyEnvLabel).toBe('Sandbox')
     expect(wrapper.vm.$refs.createKeySuccessModal.open).toHaveBeenCalled()
     // the key is on screen as well, masked, and existing keys are preserved
     expect(wrapper.vm.apiKeyList.map((key: any) => key.apiKey)).toEqual([createdKey.apiKey, consumerKey[0].apiKey])
@@ -569,7 +584,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     })
 
     it('Should reload the keys and show the create unnamed key notice', async () => {
-      vi.mocked(useOrgStore().getOrgApiKeys).mockReturnValueOnce({ consumer: { consumerKey: namedKeys }, maxNamedKeys: 10 })
+      vi.mocked(useOrgStore().getOrgApiKeys).mockResolvedValueOnce({ consumer: { consumerKey: namedKeys }, maxNamedKeys: 10 })
 
       await wrapper.vm.onCreateKey({ apiKeyName: 'key11' })
       await Vue.nextTick()
@@ -579,7 +594,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     })
 
     it('Should show the error message when the limit is unknown', async () => {
-      vi.mocked(useOrgStore().getOrgApiKeys).mockReturnValueOnce({ consumer: { consumerKey: namedKeys } })
+      vi.mocked(useOrgStore().getOrgApiKeys).mockResolvedValueOnce({ consumer: { consumerKey: namedKeys } })
 
       await wrapper.vm.onCreateKey({ apiKeyName: 'key11' })
 
@@ -590,10 +605,10 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it.each([
     ['the key is not revoked', { code: 'API_KEY_NOT_REVOKED', message: 'API key must be revoked before it can be deleted.' },
-      'API key must be revoked before it can be deleted.'],
-    ['the key no longer exists', { code: 'DATA_NOT_FOUND', message: 'No matching record found.' }, 'No matching record found.'],
-    ['the error is unknown', {}, 'The API key could not be deleted at this time. Please try again.']
-  ])('Should show the delete error and reload the keys when %s', async (_, data, alertText) => {
+      'API key must be revoked before it can be deleted.', ''],
+    ['the key no longer exists', { code: 'DATA_NOT_FOUND', message: 'No matching record found.' }, 'No matching record found.', ''],
+    ['the error is unknown', {}, 'could not be deleted at this time. Please try again.', 'key1']
+  ])('Should show the delete error and reload the keys when %s', async (_, data, alertText, keyName) => {
     const orgStore = useOrgStore()
     orgStore.deleteOrgApiKey = vi.fn().mockRejectedValue({ response: { data } }) as any
     wrapper.vm.$refs.confirmDeleteDialog = { close: vi.fn() }
@@ -606,7 +621,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(orgStore.getOrgApiKeys).toHaveBeenCalledWith(123, true)
     expect(wrapper.vm.$refs.confirmDeleteDialog.close).toHaveBeenCalled()
     expect(wrapper.vm.alertTitle).toBe('Unable to Delete API Key')
-    expect(wrapper.vm.alertKeyName).toBe('key1')
+    expect(wrapper.vm.alertKeyName).toBe(keyName)
     expect(wrapper.vm.alertText).toBe(alertText)
     expect(wrapper.vm.notificationColor).toBe('error')
     expect(wrapper.vm.$refs.successDialog.open).toHaveBeenCalled()
