@@ -53,6 +53,7 @@ describe('CreateApiKeySuccessModal.vue', () => {
       vuetify,
       propsData: {
         apiKey: 'mock-success-api-key',
+        apiKeyName: 'My Key',
         environmentLabel: 'Sandbox'
       },
       stubs: {
@@ -64,7 +65,7 @@ describe('CreateApiKeySuccessModal.vue', () => {
 
     expect(rendered.find('[data-test="created-key-row"]').text())
       .toContain('mock-success-api-key')
-    expect(rendered.find('[data-test="created-key-summary"]').text()).toBe('Sandbox key')
+    expect(rendered.find('[data-test="created-key-summary"]').text()).toBe('My Key - Sandbox key')
 
     rendered.destroy()
   })

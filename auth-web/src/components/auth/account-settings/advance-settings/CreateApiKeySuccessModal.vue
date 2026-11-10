@@ -3,28 +3,17 @@
     ref="createKeySuccessDialog"
     title="API Key Successfully Created"
     dialog-class="info-dialog"
-    max-width="600"
+    max-width="700"
     :show-icon="false"
     show-close-icon
     data-test="create-api-key-success-modal"
   >
     <template #text>
-      <div class="d-flex align-start mb-6">
-        <v-icon
-          color="warning"
-          class="mr-2"
-        >
-          mdi-alert
-        </v-icon>
-        <span class="text-left">
-          Copy or download your key to somewhere safe. This key is non-recoverable. You will not see it again once you leave this window.
-        </span>
-      </div>
       <p
-        class="font-weight-bold text-left mb-2"
+        class="font-weight-bold text-left mt-6 mb-6"
         data-test="created-key-summary"
       >
-        {{ environmentLabel }} key
+        {{ apiKeyName }} - {{ environmentLabel }} key
       </p>
       <div
         class="d-flex align-center mb-6"
@@ -33,13 +22,12 @@
         <span class="key-value mr-2">{{ apiKey }}</span>
         <v-btn
           icon
-          small
           aria-label="Copy API Key"
           title="Copy API Key"
           data-test="copy-api-key-button"
           @click="copyApiKey()"
         >
-          <v-icon small>
+          <v-icon color="primary">
             mdi-content-copy
           </v-icon>
         </v-btn>
@@ -86,6 +74,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 export default class CreateApiKeySuccessModal extends Vue {
   @Prop({ default: '' }) readonly apiKey: string
   @Prop({ default: '' }) readonly environmentLabel: string
+  @Prop({ default: '' }) readonly apiKeyName: string
 
   $refs: {
     createKeySuccessDialog: InstanceType<typeof ModalDialog>
@@ -123,7 +112,6 @@ export default class CreateApiKeySuccessModal extends Vue {
 
 <style lang="scss" scoped>
 .key-value {
-  font-family: monospace;
   font-size: 1rem;
   word-break: break-all;
 }

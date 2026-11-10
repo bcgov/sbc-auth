@@ -201,7 +201,23 @@
           </v-chip>
         </template>
         <template #[`item.apiKey`]="{ item }">
-          <span>{{ maskApiKey(item.apiKey) }}</span>
+          <div class="d-flex align-center masked-key">
+            <span>{{ maskApiKey(item.apiKey) }}</span>
+            <v-btn
+              v-if="item.apiKey"
+              icon
+              color="primary"
+              class="copy-key-btn"
+              aria-label="copy api key"
+              title="Copy API Key"
+              :data-test="getIndexedTag('copy-key-button', item.apiKey)"
+              @click="copyApiKey(item)"
+            >
+              <v-icon size="20">
+                mdi-content-copy
+              </v-icon>
+            </v-btn>
+          </div>
         </template>
         <template #[`item.keyStatus`]="{ item }">
           <span data-test="key-status-chip">{{ getKeyStatusLabel(item) }}</span>
@@ -409,6 +425,7 @@
     <CreateApiKeySuccessModal
       ref="createKeySuccessModal"
       :api-key="generatedApiKey"
+      :api-key-name="generatedApiKeyName"
       :environment-label="apiKeysEnvironmentLabel"
     />
   </div>
@@ -422,6 +439,8 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import CommonUtils from '@/util/common-util'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
+import { Event } from '@/models/event'
+import { EventBus } from '@/event-bus'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -459,6 +478,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public selectedApi: any = {}
   public revokedKeyName = ''
   public generatedApiKey = ''
+  public generatedApiKeyName = ''
 
   get isCreateApiKeyEnabled (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
@@ -673,6 +693,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       newKey.keyCreatedDate ??= new Date().toISOString()
       this.apiKeyList = [newKey, ...existingKeys]
       this.generatedApiKey = newKey.apiKey
+      this.generatedApiKeyName = this.getKeyName(newKey)
 
       this.closeCreateForm()
       await this.$nextTick()
@@ -745,6 +766,24 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   // mask the key as it is only shown once in success dialog
   public maskApiKey (key: string): string {
     return !key ? '' : `${'*'.repeat(4)}${key.slice(-4)}`
+  }
+
+  public async copyApiKey (item: any) {
+    try {
+      await navigator.clipboard.writeText(item.apiKey)
+    } catch (e) {
+      // nothing to do here
+    }
+    // the toast renders html, and the key name is user input
+    const keyName = this.escapeHtml(this.getKeyName(item))
+    const event: Event = { message: `API key copied: ${keyName}`, type: 'default', timeout: 3000 }
+    EventBus.$emit('show-toast', event)
+  }
+
+  private escapeHtml (text: string): string {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 
   public confirmationModal (apiKey) {
@@ -840,6 +879,14 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       margin-left: 0.25rem;
     }
   }
+}
+.masked-key {
+  margin: -10px 0;
+}
+
+.copy-key-btn.v-btn--icon {
+  width: 44px;
+  height: 44px;
 }
 // match the height of the large buttons (44px) next to the input
 .key-name-input ::v-deep .v-input__slot {

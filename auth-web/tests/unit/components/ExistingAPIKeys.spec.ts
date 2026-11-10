@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { EventBus } from '@/event-bus'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
@@ -564,6 +565,36 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     const names = wrapper.findAll('tbody tr .font-weight-bold').wrappers.map(r => r.text())
     expect(names[0]).toBe('new key')
     expect(wrapper.find('[data-test="new-api-key-chip"]').exists()).toBe(true)
+  })
+
+  describe('copying a key', () => {
+    let writeText: any
+    let emit: any
+
+    beforeEach(() => {
+      writeText = vi.fn(() => Promise.resolve())
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+      emit = vi.spyOn(EventBus, '$emit')
+    })
+
+    it('Should copy the full key and show a toast with the key name', async () => {
+      await wrapper.find('[data-test="copy-key-button-mock-api-key-1234"]').trigger('click')
+      await flushPromises()
+      expect(writeText).toHaveBeenCalledWith('mock-api-key-1234')
+      expect(emit).toHaveBeenCalledWith('show-toast', { message: 'API key copied: key1', type: 'default', timeout: 3000 })
+    })
+
+    it('Should escape the key name in the toast', async () => {
+      await wrapper.vm.copyApiKey({ apiKey: 'abc', apiKeyName: '<b>x</b>' })
+      expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key copied: &lt;b&gt;x&lt;/b&gt;' }))
+    })
+
+    it('Should not show the toast when the copy fails', async () => {
+      writeText.mockRejectedValue(new Error('denied'))
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      await wrapper.vm.copyApiKey(consumerKey[0])
+      expect(emit).not.toHaveBeenCalledWith('show-toast', expect.anything())
+    })
   })
 
   it('Should give each row its own action button tag', async () => {
