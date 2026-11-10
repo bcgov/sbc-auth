@@ -7,6 +7,7 @@ import {
   CreateRequestBody as CreateOrganizationRequestBody,
   Member,
   Members,
+  OrgApiKeysResponse,
   OrgPaymentDetails,
   OrgProduct,
   OrgProductsRequestBody,
@@ -183,7 +184,7 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/products`)
   }
 
-  public static async getOrgApiKeys (orgId: number, all = false): Promise<AxiosResponse<OrgProduct>> {
+  public static async getOrgApiKeys (orgId: number, all = false): Promise<AxiosResponse<OrgApiKeysResponse>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`, { params: all ? { all: true } : {} })
   }
 

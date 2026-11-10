@@ -225,6 +225,8 @@
   "removeFirmSuccessText": "You have successfully removed a registration",
   "myBusinessDashSubtitle": "Start B.C. based businesses and keep business records up to date.",
   "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\"",
+  "developerAccessSubtitleSandbox": "Use developer access to integrate BC Registries API services with your system. You're currently in the <strong>sandbox</strong> environment, where you can try out your integration before going live.<br /><br /><strong>Note:</strong> Data is not shared between the sandbox and production environments. To switch environments, sign in to an account in the environment you want to use. Learn more in the <a href=\"{url}\">API documentation</a>.",
+  "developerAccessSubtitleProd": "Use developer access to integrate BC Registries API services with your system. You're currently in the <strong>production</strong> environment, which is the live environment used by your users.<br /><br /><strong>Note:</strong> Data is not shared between the sandbox and production environments. To switch environments, sign in to an account in the environment you want to use. Learn more in the <a href=\"{url}\">API documentation</a>.",
   "developerAccessSubtitle": "Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>.",
   "vendorConnectionsTitle": "Third-Party Connections",
   "vendorConnectionsSubtitle": "This page displays the service providers your account is connected to. You can view, manage, or remove these connections at any time.",

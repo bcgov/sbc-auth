@@ -2,8 +2,11 @@
   <div>
     <header class="view-header align-center mt-n1 mb-7">
       <div>
-        <h2 class="view-header__title">
-          API Keys
+        <h2
+          class="view-header__title"
+          data-test="api-keys-title"
+        >
+          {{ apiKeysTitle }}
         </h2>
         <p
           class="mb-0 mt-1"
@@ -187,7 +190,7 @@
           </div>
           <v-chip
             v-if="item.isNewlyAdded"
-            small
+            x-small
             label
             color="primary"
             text-color="white"
@@ -197,19 +200,14 @@
             ADDED
           </v-chip>
         </template>
-        <template #[`item.environment`]="{ item }">
-          <div class="text-capitalize">
-            {{ item.environment }}
-          </div>
-        </template>
-        <template #[`item.keyCreatedDate`]="{ item }">
-          {{ item.keyCreatedDate ? formatDate(item.keyCreatedDate, 'MMMM DD, YYYY') : '-' }}
-        </template>
         <template #[`item.apiKey`]="{ item }">
           <span>{{ maskApiKey(item.apiKey) }}</span>
         </template>
         <template #[`item.keyStatus`]="{ item }">
           <span data-test="key-status-chip">{{ getKeyStatusLabel(item) }}</span>
+        </template>
+        <template #[`item.keyCreatedDate`]="{ item }">
+          {{ item.keyCreatedDate ? formatDate(item.keyCreatedDate, 'MMMM DD, YYYY') : '-' }}
         </template>
         <template #[`item.action`]="{ item }">
           <!-- Revoke -->
@@ -295,7 +293,7 @@
       data-test="confirm-delete-modal"
     >
       <template #text>
-        <p class="mb-0">
+        <p class="mb-2">
           Deleting this API key will permanently remove it. This action cannot be undone.
         </p>
         <p class="mb-0">
@@ -390,7 +388,9 @@
       </template>
       <template #text>
         <p class="mb-0">
-          <strong v-if="alertKeyName">{{ alertKeyName }}</strong> {{ alertText }}
+          <template v-if="alertTextPrefix">
+            {{ alertTextPrefix }}
+          </template><strong v-if="alertKeyName">{{ alertKeyName }}</strong> {{ alertText }}
         </p>
       </template>
       <template #actions>
@@ -409,13 +409,14 @@
     <CreateApiKeySuccessModal
       ref="createKeySuccessModal"
       :api-key="generatedApiKey"
-      :environment-label="createdKeyEnvLabel"
+      :environment-label="apiKeysEnvironmentLabel"
     />
   </div>
 </template>
 
 <script lang="ts">
 import { Action, State } from 'pinia-class'
+import { ApiKey, OrgApiKeysResponse, Organization } from '@/models/Organization'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
@@ -424,7 +425,6 @@ import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Organization } from '@/models/Organization'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -435,7 +435,8 @@ import { useOrgStore } from '@/stores/org'
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @State(useOrgStore) readonly currentOrganization!: Organization
-  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any, all?: boolean) => Promise<any>
+  @State(useOrgStore) readonly apiKeysEnvironmentLabel!: string
+  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any, all?: boolean) => Promise<Partial<OrgApiKeysResponse>>
   @Action(useOrgStore) readonly createOrgApiKey!: (orgId: any, payload: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
   @Action(useOrgStore) readonly deleteOrgApiKey!: (apiDetails: any) => Promise<any>
@@ -451,13 +452,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public isNamedKeyLimitNoticeOpen = false
   public alertText = ''
   public alertKeyName = ''
+  public alertTextPrefix = ''
   public alertTitle = ''
   public alertIcon = 'mdi-check'
   public notificationColor = 'success'
   public selectedApi: any = {}
   public revokedKeyName = ''
   public generatedApiKey = ''
-  public createdKeyEnvLabel = ''
 
   get isCreateApiKeyEnabled (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
@@ -466,6 +467,15 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   // counts include revoked keys, as they are listed until deleted
   get namedKeyCount (): number {
     return this.apiKeyList.filter(key => this.isKeyNamed(key)).length
+  }
+
+  // empty when the flag is off or the environment is not yet known, so a wrong environment is never shown
+  get environmentTitle (): string {
+    return this.isCreateApiKeyEnabled ? this.apiKeysEnvironmentLabel : ''
+  }
+
+  get apiKeysTitle (): string {
+    return this.environmentTitle ? `${this.environmentTitle} API Keys` : 'API Keys'
   }
 
   get unnamedKeyCount (): number {
@@ -491,7 +501,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     createKeySuccessModal: InstanceType<typeof CreateApiKeySuccessModal>
   }
 
-  public apiKeyList = []
+  public apiKeyList: ApiKey[] = []
 
   // headers of the old table, shown when EnableCreateApiKey feature flag is disabled
   public readonly legacyActivityHeader = [
@@ -533,26 +543,11 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       value: 'apiKeyName',
       class: 'bold-header'
     },
-
     {
-      text: 'Environment',
-      align: 'left',
-      sortable: false,
-      value: 'environment',
-      class: 'bold-header'
-    },
-    {
-      text: 'API Key',
+      text: 'Key',
       align: 'left',
       sortable: false,
       value: 'apiKey',
-      class: 'bold-header'
-    },
-    {
-      text: 'Created Date',
-      align: 'left',
-      sortable: false,
-      value: 'keyCreatedDate',
       class: 'bold-header'
     },
     {
@@ -563,11 +558,19 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       class: 'bold-header'
     },
     {
+      text: 'Created Date',
+      align: 'left',
+      sortable: false,
+      value: 'keyCreatedDate',
+      class: 'bold-header'
+    },
+    {
       text: 'Actions',
       align: 'right',
       sortable: false,
       value: 'action',
-      class: 'bold-header'
+      class: 'bold-header',
+      width: '150px'
     }
   ]
 
@@ -590,7 +593,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.isLoading = true
     this.apiKeyList = []
     try {
-      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, true)
+      const resp = await this.getOrgApiKeys(this.currentOrganization.id, true)
       this.apiKeyList = resp?.consumer?.consumerKey || []
       this.maxNamedKeys = resp?.maxNamedKeys ?? null
       this.isLoading = false
@@ -655,12 +658,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       if (!newKey) {
         this.closeCreateForm()
         await this.loadApiKeys()
-        this.alertIcon = 'mdi-alert-outline'
-        this.alertTitle = 'API key has been created'
-        this.alertKeyName = ''
-        this.alertText = 'The key value could not be displayed. If you need it, revoke this key and create a new one.'
-        this.notificationColor = 'warning'
-        this.$refs.successDialog.open()
+        this.openAlert(
+          'warning',
+          'mdi-alert-outline',
+          'API key has been created',
+          '',
+          'The key value could not be displayed. If you need it, revoke this key and create a new one.'
+        )
         return
       }
 
@@ -669,8 +673,6 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       newKey.keyCreatedDate ??= new Date().toISOString()
       this.apiKeyList = [newKey, ...existingKeys]
       this.generatedApiKey = newKey.apiKey
-      const environmentLabel = newKey.environment || ''
-      this.createdKeyEnvLabel = environmentLabel.charAt(0).toUpperCase() + environmentLabel.slice(1)
 
       this.closeCreateForm()
       await this.$nextTick()
@@ -694,20 +696,21 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
           return
         }
       }
-      this.alertText = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED']) ||
+      const message = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED']) ||
         'The API key could not be created at this time. Please try again.'
-      this.showErrorAlert('Unable to Create API Key', '', this.alertText)
+      this.openAlert('error', 'mdi-alert', 'Unable to Create API Key', '', message)
     } finally {
       this.isCreating = false
     }
   }
 
-  private showErrorAlert (title: string, keyName: string, text: string) {
-    this.alertIcon = 'mdi-alert'
+  private openAlert (color: string, icon: string, title: string, keyName: string, text: string, textPrefix = '') {
+    this.notificationColor = color
+    this.alertIcon = icon
     this.alertTitle = title
     this.alertKeyName = keyName
+    this.alertTextPrefix = textPrefix
     this.alertText = text
-    this.notificationColor = 'error'
     this.$refs.successDialog.open()
   }
 
@@ -784,9 +787,11 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     // always reload, as a failed request may still have changed the key (e.g. changed in another tab)
     await this.loadApiKeys()
     if (!isSuccess) {
-      this.alertTitle = `Unable to ${result === 'Revoked' ? 'Revoke' : 'Delete'} API Key`
-      this.alertText = errorMessage || `The API key could not be ${result.toLowerCase()} at this time. Please try again.`
-      this.showErrorAlert(this.alertTitle, apiKeyName, this.alertText)
+      const title = `Unable to ${result === 'Revoked' ? 'Revoke' : 'Delete'} API Key`
+      const keyName = errorMessage ? '' : apiKeyName
+      const text = errorMessage || `could not be ${result.toLowerCase()} at this time. Please try again.`
+      const textPrefix = errorMessage ? '' : 'The API Key:'
+      this.openAlert('error', 'mdi-alert', title, keyName, text, textPrefix)
       return
     }
     // a revoked key has its own success dialog
@@ -795,12 +800,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       this.$refs.revokeSuccessDialog.open()
       return
     }
-    this.alertIcon = 'mdi-check'
-    this.alertTitle = 'API Key Has Been Deleted'
-    this.alertKeyName = apiKeyName
-    this.alertText = 'has been deleted.'
-    this.notificationColor = 'success'
-    this.$refs.successDialog.open()
+    this.openAlert('success', 'mdi-check', 'API Key Has Been Deleted', apiKeyName, 'has been deleted.')
   }
 
   public close (dialog) {

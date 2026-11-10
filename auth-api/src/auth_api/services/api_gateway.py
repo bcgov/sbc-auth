@@ -225,8 +225,12 @@ class ApiGateway:
         if skip_auth is False:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         # api keys limit are coming from api, for the benefit of defining it in one place
-        api_keys_response = {"consumer": {"consumerKey": []}, "maxNamedKeys": MAX_NAMED_API_KEYS}
         env = current_app.config.get("ENVIRONMENT_NAME")
+        api_keys_response = {
+            "consumer": {"consumerKey": []},
+            "maxNamedKeys": MAX_NAMED_API_KEYS,
+            "environment": cls._normalize_environment(env),
+        }
         email = cls._get_email_id(org_id, env)
         gw_api_key: str = current_app.config.get("API_GW_KEY")
         try:
