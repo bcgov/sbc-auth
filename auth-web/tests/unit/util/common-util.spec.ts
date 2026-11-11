@@ -207,6 +207,11 @@ describe('Common Util Test', () => {
     expect(CommonUtil.trimTrailingSlashURL('abc/')).toBe('abc')
   })
 
+  it('escapeHtml escapes html special characters', () => {
+    expect(CommonUtil.escapeHtml(`<a href="x">'&'</a>`)).toBe('&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;')
+    expect(CommonUtil.escapeHtml('')).toBe('')
+  })
+
   it('formatAmount returns formatted amount', () => {
     expect(CommonUtil.formatAmount(1234.567)).toBe('$1,234.57')
   })

@@ -210,7 +210,7 @@
               class="copy-key-btn"
               aria-label="copy api key"
               title="Copy API Key"
-              :data-test="getIndexedTag('copy-key-button', item.apiKey)"
+              data-test="copy-key-button"
               @click="copyApiKey(item)"
             >
               <v-icon size="20">
@@ -232,7 +232,7 @@
             depressed
             aria-label="Revoke"
             color="primary"
-            :data-test="getIndexedTag('confirm-button', item.apiKey)"
+            data-test="confirm-button"
             @click="confirmationModal(item)"
           >
             Revoke
@@ -243,7 +243,7 @@
             depressed
             aria-label="Delete"
             color="primary"
-            :data-test="getIndexedTag('delete-button', item.apiKey)"
+            data-test="delete-button"
             @click="confirmDelete(item)"
           >
             Delete
@@ -439,11 +439,10 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import CommonUtils from '@/util/common-util'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
-import { Event } from '@/models/event'
-import { EventBus } from '@/event-bus'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { copyApiKeyToClipboard } from '@/util/api-key-util'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -763,27 +762,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     return this.isKeyNamed(item) ? item.apiKeyName.trim() : 'Unnamed Key'
   }
 
-  // mask the key as it is only shown once in success dialog
+  // mask the key for ui only, full key can be copied with the copy button
   public maskApiKey (key: string): string {
     return !key ? '' : `${'*'.repeat(4)}${key.slice(-4)}`
   }
 
-  public async copyApiKey (item: any) {
-    try {
-      await navigator.clipboard.writeText(item.apiKey)
-    } catch (e) {
-      // nothing to do here
-    }
-    // the toast renders html, and the key name is user input
-    const keyName = this.escapeHtml(this.getKeyName(item))
-    const event: Event = { message: `API key copied: ${keyName}`, type: 'default', timeout: 3000 }
-    EventBus.$emit('show-toast', event)
-  }
-
-  private escapeHtml (text: string): string {
-    const div = document.createElement('div')
-    div.textContent = text
-    return div.innerHTML
+  public async copyApiKey (item: any): Promise<void> {
+    await copyApiKeyToClipboard(item.apiKey, this.getKeyName(item))
   }
 
   public confirmationModal (apiKey) {

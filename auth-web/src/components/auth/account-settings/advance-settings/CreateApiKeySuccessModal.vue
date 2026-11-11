@@ -13,7 +13,7 @@
         class="font-weight-bold text-left mt-6 mb-6"
         data-test="created-key-summary"
       >
-        {{ apiKeyName }} - {{ environmentLabel }} key
+        {{ displayName }} - {{ environmentLabel }} key
       </p>
       <div
         class="d-flex align-center mb-6"
@@ -65,6 +65,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { copyApiKeyToClipboard } from '@/util/api-key-util'
 
 @Component({
   components: {
@@ -75,6 +76,10 @@ export default class CreateApiKeySuccessModal extends Vue {
   @Prop({ default: '' }) readonly apiKey: string
   @Prop({ default: '' }) readonly environmentLabel: string
   @Prop({ default: '' }) readonly apiKeyName: string
+
+  get displayName (): string {
+    return this.apiKeyName || 'Unnamed Key'
+  }
 
   $refs: {
     createKeySuccessDialog: InstanceType<typeof ModalDialog>
@@ -88,12 +93,8 @@ export default class CreateApiKeySuccessModal extends Vue {
     this.$refs.createKeySuccessDialog.close()
   }
 
-  public async copyApiKey () {
-    try {
-      await navigator.clipboard.writeText(this.apiKey)
-    } catch (e) {
-      // nothing to do here
-    }
+  public async copyApiKey (): Promise<void> {
+    await copyApiKeyToClipboard(this.apiKey, this.displayName)
   }
 
   public downloadApiKey () {

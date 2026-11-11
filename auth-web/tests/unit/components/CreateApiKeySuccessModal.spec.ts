@@ -1,5 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
+import { EventBus } from '@/event-bus'
 import Vuetify from 'vuetify'
 
 const vuetify = new Vuetify({})
@@ -45,6 +46,23 @@ describe('CreateApiKeySuccessModal.vue', () => {
     await wrapper.vm.copyApiKey()
 
     expect(navigator.clipboard.writeText).toBeCalledWith('test-api-key-123')
+  })
+
+  it('shows a toast after copying the api key', async () => {
+    const emit = vi.spyOn(EventBus, '$emit')
+    await wrapper.setProps({ apiKeyName: 'My Key' })
+    await wrapper.vm.copyApiKey()
+
+    expect(emit).toHaveBeenCalledWith('show-toast', { message: 'API key copied: My Key', type: 'default', timeout: 3000 })
+  })
+
+  it('does not show a toast when the copy fails', async () => {
+    const emit = vi.spyOn(EventBus, '$emit')
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error('denied'))
+    await wrapper.vm.copyApiKey()
+
+    expect(emit).not.toHaveBeenCalledWith('show-toast', expect.anything())
   })
 
   it('shows the key in full only once in the success modal', () => {

@@ -355,4 +355,17 @@ export default class CommonUtils {
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase())
   }
+
+  // escapes user input before it is placed in html, e.g. a toast message (toasts render with v-html)
+  static escapeHtml (text: string): string {
+    const HTML_ESCAPES = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }
+
+    return (text || '').replace(/[&<>"']/g, char => HTML_ESCAPES[char])
+  }
 }
