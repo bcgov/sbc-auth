@@ -165,6 +165,8 @@ def handle_nsf_lock_unlock_account(message_type, email_msg):
         template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
         org_id = email_msg.get("accountId")
         admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
+        if additional_emails := email_msg.get("additionalEmails"):
+            admin_coordinator_emails += "," + additional_emails
         subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
         logo_url = email_msg.get("logo_url")
 
