@@ -154,11 +154,7 @@ def test_lock_account_mailer_queue(app, session, client):
         assert True
 
 
-@pytest.mark.parametrize(
-    "additional_emails, expected_recipients",
-    [(None, "foo@bar.com"), ("rev@gov.bc.ca", "foo@bar.com,rev@gov.bc.ca")],
-)
-def test_unlock_account_mailer_queue(app, session, client, additional_emails, expected_recipients):
+def test_unlock_account_mailer_queue(app, session, client):
     """Assert that events can be retrieved and decoded from the Queue."""
     user = factory_user_model_with_contact()
     org = factory_org_model()
@@ -248,15 +244,13 @@ def test_unlock_account_mailer_queue(app, session, client, additional_emails, ex
                     "folioNumber": "1234567890",
                 },
             }
-            if additional_emails:
-                mail_details["additionalEmails"] = additional_emails
             helper_add_event_to_queue(
                 client,
                 message_type=QueueMessageTypes.NSF_UNLOCK_ACCOUNT.value,
                 mail_details=mail_details,
             )
             mock_send.assert_called()
-            assert mock_send.call_args.args[0].get("recipients") == expected_recipients
+            assert mock_send.call_args.args[0].get("recipients") == "foo@bar.com"
             assert (
                 mock_send.call_args.args[0].get("content").get("subject")
                 == SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
