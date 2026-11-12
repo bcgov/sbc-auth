@@ -1,6 +1,10 @@
 # Account Unlocked
 
 Your account **{{ account_number }}: {{ account_name_with_branch }}** has been unlocked. Team members can now log in and access this account.
+{% if restrict_pad %}
+
+Pre-authorized debit is no longer available on this account. An account administrator needs to log in and choose a new payment method in Account Settings before making new transactions.
+{% endif %}
 
 Your receipt is attached to this email:
 
