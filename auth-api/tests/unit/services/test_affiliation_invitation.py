@@ -1215,6 +1215,33 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     assert data["isReminder"] == is_reminder
 
 
+@patch.object(auth_api.services.affiliation_invitation.AffiliationInvitation, "_get_business_details")
+@patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
+def test_send_unaffiliated_email_invitation_send_email_false(
+    publish_to_mailer_mock,
+    get_business_details_mock,
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    mock_service_account_token,
+):
+    """Verify UNAFFILIATED_EMAIL - send_email=False tokenizes the invitation without mailing or business lookup."""
+    entity = create_test_entity()
+
+    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity, send_email=False)
+
+    publish_to_mailer_mock.assert_not_called()
+    get_business_details_mock.assert_not_called()
+    token = invitation.as_dict()["token"]
+    assert token
+    assert invitation.as_dict()["status"] == InvitationStatus.PENDING.value
+    assert (
+        AffiliationInvitationService.build_unaffiliated_context_url(token)
+        == f"https://localhost.com?preset=bcscUser&token={token}"
+    )
+
+
 def test_validate_and_get_org_id():
     """Test _validate_and_get_org_id calls check_auth for UNAFFILIATED_EMAIL."""
     inv = mock.MagicMock(

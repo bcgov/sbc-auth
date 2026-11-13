@@ -102,15 +102,22 @@ def post_affiliation_invitation():
 @cross_origin(origins="*", methods=["POST"])
 @_jwt.has_one_of_roles([Role.SYSTEM.value])
 def post_unaffiliated_invitation(business_identifier):
-    """Send an unaffiliated email invitation for the entity."""
+    """Create or refresh an unaffiliated email invitation for the entity and return its SAF link."""
     try:
         request_json = request.get_json(silent=True) or {}
         is_reminder = request_json.get("isReminder", False)
+        send_email = request_json.get("sendEmail", True)
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if not entity:
             return {"message": "Business not found."}, HTTPStatus.NOT_FOUND
-        AffiliationInvitationService.send_unaffiliated_email_invitation(entity, is_reminder=is_reminder)
-        return {}, HTTPStatus.CREATED
+        invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(
+            entity, is_reminder=is_reminder, send_email=send_email
+        ).as_dict()
+        return {
+            "contextUrl": AffiliationInvitationService.build_unaffiliated_context_url(invitation["token"]),
+            "expiresOn": invitation.get("expires_on"),
+            "recipientEmail": invitation["recipient_email"],
+        }, HTTPStatus.CREATED
     except BusinessException as exception:
         return {"code": exception.code, "message": exception.message}, exception.status_code
 
