@@ -1,12 +1,15 @@
+import { LDFlags, Role } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { useCodesStore, useOrgStore, useStaffStore, useTaskStore, useUserStore } from '@/stores'
 import { BaseVExpansionPanel } from '@/components'
+import ConfigHelper from '@/util/config-helper'
 import ContinuationApplications from '@/components/auth/staff/continuation-application/ContinuationApplications.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import LaunchTile from '@/components/LaunchTile.vue'
 import { MembershipType } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
-import { Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
@@ -19,6 +22,7 @@ const vuetify = new Vuetify({})
 
 describe('StaffDashboardView tests', () => {
   let wrapper: Wrapper<any>
+  let i18n: any
 
   const config = {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
@@ -50,7 +54,7 @@ describe('StaffDashboardView tests', () => {
     staffStore.pendingInvitationOrgs = []
     staffStore.suspendedStaffOrgs = []
 
-    const i18n = createI18n({
+    i18n = createI18n({
       locale: 'en',
       messages: {
         en: {
@@ -94,5 +98,38 @@ describe('StaffDashboardView tests', () => {
     expansionPanels.at(1).find('button').trigger('click')
     await Vue.nextTick()
     expect(wrapper.findComponent(Transactions).exists()).toBe(true)
+  })
+
+  const mountWithFlags = (payInsightsOn: boolean) => {
+    vi.spyOn(LaunchDarklyService, 'getFlag').mockImplementation(
+      (flag: string) => flag === LDFlags.EnablePayInsights ? payInsightsOn : false
+    )
+    return mount(StaffDashboardView, {
+      localVue: createLocalVue(),
+      vuetify,
+      i18n,
+      stubs: ['Transactions', 'StaffAccountManagement', 'ContinuationApplications', 'PPRLauncher', 'GLCodesListView']
+    })
+  }
+
+  const payInsightsTile = () => wrapper.findAllComponents(LaunchTile)
+    .wrappers.find(t => t.props('tileConfig').title === 'PAY Insights')
+
+  it('shows the PAY Insights tile for staff when the flag is on', () => {
+    wrapper = mountWithFlags(true)
+    const tile = payInsightsTile().props('tileConfig')
+    expect(tile.showTile).toBe(true)
+    expect(tile.href).toBe(ConfigHelper.getPayInsightsUrl())
+  })
+
+  it('hides the PAY Insights tile when the flag is off', () => {
+    wrapper = mountWithFlags(false)
+    expect(payInsightsTile().props('tileConfig').showTile).toBe(false)
+  })
+
+  it('hides the PAY Insights tile without the staff role, even with the flag on', () => {
+    useUserStore().currentUser = { roles: [Role.FasSearch] } as any
+    wrapper = mountWithFlags(true)
+    expect(payInsightsTile().props('tileConfig').showTile).toBe(false)
   })
 })
