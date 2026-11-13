@@ -41,13 +41,20 @@
           <div class="mt-8 mb-10">
             <div>Your account has successfully been unlocked,</div>
             <div>Thank you for unlocking your account.</div>
+            <div
+              v-if="isPadRestricted"
+              class="mt-4"
+            >
+              Pre-authorized debit is no longer available on this account.
+              Please update your payment method before making new transactions.
+            </div>
           </div>
           <div class="btns">
             <v-btn
               large
               color="primary"
               class="action-btn font-weight-bold"
-              @click="goTo('account-info')"
+              @click="goTo(isPadRestricted ? 'product-settings' : 'account-info')"
             >
               Ok
             </v-btn>
@@ -75,9 +82,9 @@
 
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
+import { OrgPaymentDetails, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -85,13 +92,15 @@ import { useOrgStore } from '@/stores/org'
     ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions(useOrgStore, ['syncOrganization'])
+    ...mapActions(useOrgStore, ['syncOrganization', 'getOrgPayments'])
   }
 })
 export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  protected readonly getOrgPayments!: (orgId?: number) => Promise<OrgPaymentDetails>
   isLoading: boolean = false
+  isPadRestricted: boolean = false
   isFailed: boolean = false
   errorMsg: string = ''
   readonly TIMEOUT_DURATION = 10000
@@ -101,6 +110,8 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
       case 'account-info': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
         break
       case 'transactions': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/transactions`)
+        break
+      case 'product-settings': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/product-settings`)
         break
       case 'account-unlock': this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
         break
@@ -130,6 +141,7 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
       this.isLoading = false
       this.isFailed = (this.currentOrganization?.statusCode !== AccountStatus.ACTIVE)
     }, this.TIMEOUT_DURATION)
+    this.isPadRestricted = !!(await this.getOrgPayments())?.restrictPad
   }
 }
 </script>

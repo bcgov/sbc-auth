@@ -52,6 +52,7 @@ def _get_account_unlock_email(data):
         logo_url=data.get("logo_url"),
         account_name_with_branch=account_name_with_branch,
         account_number=org_id,
+        restrict_pad=(data.get("template_vars") or {}).get("restrictPad", False),
     )
     return html_out
 
