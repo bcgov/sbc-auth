@@ -1121,6 +1121,7 @@ def setup_entity_with_contact(client, jwt, entity_info=TestEntityInfo.entity_lea
         (None, False),
         ({"isReminder": False}, False),
         ({"isReminder": True}, True),
+        ({"sendEmail": False, "isReminder": True}, True),
     ],
 )
 def test_send_unaffiliated_email_invitation(
@@ -1148,6 +1149,55 @@ def test_send_unaffiliated_email_invitation(
     entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
     invitations = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)
     assert invitations[0].additional_message.startswith("Reminder:") is expects_reminder_prefix
+
+
+def test_send_unaffiliated_email_invitation_returns_context_url(
+    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token
+):
+    """Assert the unaffiliated POST returns the SAF link built from the stored invitation token."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitation = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)[0]
+    registry_home_url = client.application.config["REGISTRY_HOME_URL"]
+    body = json.loads(rv.data)
+    assert body["contextUrl"] == f"{registry_home_url}?preset=bcscUser&token={invitation.token}"
+    assert body["expiresOn"]
+
+
+def test_send_unaffiliated_email_invitation_send_email_false_skips_mailer(client, jwt, session, keycloak_mock):
+    """Assert sendEmail=false creates the tokenized invitation without mailing or looking up the business."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    with (
+        patch("auth_api.services.affiliation_invitation.publish_to_mailer") as mock_mailer,
+        patch("auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details") as mock_business,
+    ):
+        rv = client.post(
+            f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+            data=json.dumps({"sendEmail": False}),
+            headers=headers,
+            content_type="application/json",
+        )
+
+    assert rv.status_code == HTTPStatus.CREATED
+    mock_mailer.assert_not_called()
+    mock_business.assert_not_called()
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitation = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)[0]
+    assert invitation.invitation_status_code == InvitationStatus.PENDING.value
+    assert invitation.token
+    assert json.loads(rv.data)["contextUrl"].endswith(f"token={invitation.token}")
 
 
 def test_send_unaffiliated_email_invitation_skips_business_check_with_role(client, jwt, session, keycloak_mock):

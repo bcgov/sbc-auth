@@ -913,11 +913,14 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def send_unaffiliated_email_invitation(entity: EntityService, is_reminder: bool = False, **kwargs):
+    def send_unaffiliated_email_invitation(
+        entity: EntityService, is_reminder: bool = False, send_email: bool = True, **kwargs
+    ):
         """Send an UNAFFILIATED_EMAIL affiliation invitation to entity contact. SYSTEM access only.
 
         If a pending invitation already exists for the same email, update it and resend.
         If the email has changed, create a new invitation row.
+        send_email=False: create/refresh and tokenize only, the caller delivers the link.
         """
         user_from_context: UserContext = kwargs["user_context"]
         if AffiliationModel.find_affiliations_by_entity_id(entity.identifier):
@@ -962,6 +965,29 @@ class AffiliationInvitation:
         affiliation_invitation.login_source = LoginSource.BCSC.value
         affiliation_invitation.save()
 
+        if send_email:
+            AffiliationInvitation._publish_unaffiliated_email(
+                entity, affiliation_invitation, contact.email, is_reminder, user_from_context
+            )
+
+        # Note this has token response
+        return AffiliationInvitation(affiliation_invitation)
+
+    @staticmethod
+    def build_unaffiliated_context_url(token: str) -> str:
+        """Return the registry-home SAF entry link carrying the invitation token."""
+        registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
+        return f"{registry_home_url}?preset=bcscUser&token={token}"
+
+    @staticmethod
+    def _publish_unaffiliated_email(
+        entity: EntityService,
+        affiliation_invitation: AffiliationInvitationModel,
+        recipient_email: str,
+        is_reminder: bool,
+        user_from_context: UserContext,
+    ):
+        """Resolve the business name and publish the UNAFFILIATED_EMAIL mailer message."""
         business_name = entity.name
         if not user_from_context.has_role(Role.SKIP_UNAFFILIATED_BUSINESS_CHECK.value):
             token = RestService.get_service_account_token(
@@ -975,23 +1001,16 @@ class AffiliationInvitation:
                     business, business_name, entity.business_identifier
                 )
 
-        registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-        context_url = f"{registry_home_url}?preset=bcscUser&token={confirmation_token}"
-        expiry_date = affiliation_invitation.expires_on
-
         mailer_data = UnaffiliatedEmailInvitationData(
             business_name=business_name,
-            email_addresses=contact.email,
+            email_addresses=recipient_email,
             business_identifier=entity.business_identifier,
-            token=confirmation_token,
-            context_url=context_url,
-            expiry_date=expiry_date,
+            token=affiliation_invitation.token,
+            context_url=AffiliationInvitation.build_unaffiliated_context_url(affiliation_invitation.token),
+            expiry_date=affiliation_invitation.expires_on,
             is_reminder=is_reminder,
         )
         publish_to_mailer(
             notification_type=QueueMessageType.AFFILIATION_INVITATION_UNAFFILIATED_EMAIL.value,
             data=mailer_data.to_dict(),
         )
-
-        # Note this has token response
-        return AffiliationInvitation(affiliation_invitation)

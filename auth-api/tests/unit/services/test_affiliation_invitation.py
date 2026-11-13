@@ -925,7 +925,7 @@ def test_send_affiliation_invitation_request_sent(
         "expiryText": "12 hours",
         "userFirstName": "",
         "userLastName": "Unknown Name",
-        "toOrgId": affiliation_invitation.to_org.id
+        "toOrgId": affiliation_invitation.to_org.id,
     }
     notification_type = QueueMessageTypes.AFFILIATION_INVITATION_REQUEST.value
     publish_to_mailer_mock.assert_called_with(notification_type=notification_type, data=expected_data)
@@ -1213,6 +1213,33 @@ def test_send_unaffiliated_email_invitation_mailer_data(
     # sent date == 21/04/2026 12:00:00 with @freeze_time
     assert data["expiryDate"] == datetime(2026, 4, 28, 23, 59, 59)  # April 28, 2026 11:59:59pm
     assert data["isReminder"] == is_reminder
+
+
+@patch.object(auth_api.services.affiliation_invitation.AffiliationInvitation, "_get_business_details")
+@patch.object(auth_api.services.affiliation_invitation, "publish_to_mailer")
+def test_send_unaffiliated_email_invitation_send_email_false(
+    publish_to_mailer_mock,
+    get_business_details_mock,
+    session,
+    auth_mock,
+    keycloak_mock,
+    business_mock,
+    mock_service_account_token,
+):
+    """Verify UNAFFILIATED_EMAIL - send_email=False tokenizes the invitation without mailing or business lookup."""
+    entity = create_test_entity()
+
+    invitation = AffiliationInvitationService.send_unaffiliated_email_invitation(entity, send_email=False)
+
+    publish_to_mailer_mock.assert_not_called()
+    get_business_details_mock.assert_not_called()
+    token = invitation.as_dict()["token"]
+    assert token
+    assert invitation.as_dict()["status"] == InvitationStatus.PENDING.value
+    assert (
+        AffiliationInvitationService.build_unaffiliated_context_url(token)
+        == f"https://localhost.com?preset=bcscUser&token={token}"
+    )
 
 
 def test_validate_and_get_org_id():
