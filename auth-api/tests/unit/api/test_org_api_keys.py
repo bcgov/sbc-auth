@@ -189,10 +189,13 @@ def test_create_api_key_named_key_limit(
 
     posted_urls = []
 
-    def mock_post(*args, **_kwargs):
+    def mock_post(*args, **kwargs):
         posted_urls.append(args[0])
         mock_response = Mock()
-        mock_response.json.return_value = {"apiKey": "new-key", "keyStatus": "approved"}
+        created_key = {"apiKey": "new-key", "keyStatus": "approved"}
+        if "apiKeyName" in kwargs["data"]:
+            created_key["apiKeyName"] = kwargs["data"]["apiKeyName"]
+        mock_response.json.return_value = created_key
         return mock_response
 
     monkeypatch.setattr("auth_api.services.rest_service.RestService.post", mock_post)
