@@ -100,6 +100,8 @@ class ApiGateway:
             key.setdefault("environment", cls._normalize_environment(env))
 
         cls._create_user_and_membership_for_api_user(org_id, env)
+        for key in response["consumer"]["consumerKey"]:
+            cls._publish_key_activity(ActivityAction.API_KEY_CREATED.value, org_id, cls._get_key_display_name(key), key["apiKey"])
         return response
 
     @classmethod

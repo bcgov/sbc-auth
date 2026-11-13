@@ -124,13 +124,17 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
 
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
-    rv = client.post(
-        f"/api/v1/orgs/{org_id}/api-keys",
-        headers=headers,
-        content_type="application/json",
-        data=json.dumps({"apiKeyName": "TEST"}),
-    )
-    assert rv.json["consumer"]["consumerKey"]
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        rv = client.post(
+            f"/api/v1/orgs/{org_id}/api-keys",
+            headers=headers,
+            content_type="application/json",
+            data=json.dumps({"apiKeyName": "TEST"}),
+        )
+        assert rv.json["consumer"]["consumerKey"]
+        mock_activity.assert_called_once_with(
+            Activity(org_id=org_id, action=ActivityAction.API_KEY_CREATED.value, name="TEST", value="...-123")
+        )
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get(f"/api/v1/orgs/{org_id}", headers=headers, content_type="application/json")
@@ -199,15 +203,25 @@ def test_create_api_key_named_key_limit(
     )
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
-    rv = client.post(
-        f"/api/v1/orgs/{org_id}/api-keys", headers=headers, content_type="application/json", data=json.dumps(payload)
-    )
+    with patch.object(ActivityLogPublisher, "publish_activity") as mock_activity:
+        rv = client.post(
+            f"/api/v1/orgs/{org_id}/api-keys",
+            headers=headers,
+            content_type="application/json",
+            data=json.dumps(payload),
+        )
     assert rv.status_code == expected_status
     if expected_status == HTTPStatus.BAD_REQUEST:
         assert rv.json["code"] == Error.API_KEY_NAMED_LIMIT_REACHED.name
         assert not posted_urls
+        mock_activity.assert_not_called()
     else:
         assert len(posted_urls) == 1
+        # the gateway response has no name here, so the requested name is logged
+        expected_name = (payload.get("apiKeyName") or payload.get("keyName") or "").strip()
+        mock_activity.assert_called_once_with(
+            Activity(org_id=org_id, action=ActivityAction.API_KEY_CREATED.value, name=expected_name, value="...-key")
+        )
 
 
 def test_list_api_keys(client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch):  # pylint:disable=unused-argument
