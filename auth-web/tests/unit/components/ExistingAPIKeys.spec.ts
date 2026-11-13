@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { EventBus } from '@/event-bus'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
@@ -150,7 +151,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   it('Should have data table', async () => {
     await wrapper.vm.loadApiKeys()
     expect(wrapper.find('.apikey-list')).toBeTruthy()
-    expect(wrapper.find('[data-test="confirm-button-mock-api-key-1234"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(true)
   })
 
   // create API key feature flag switches between the legacy and the new table
@@ -180,8 +181,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   it('Should show Active status and revoke button for approved keys', async () => {
     await mountWithCreateApiKeyFF(true)
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Active')
-    expect(wrapper.find('[data-test="confirm-button-mock-api-key-1234"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="delete-button-mock-api-key-1234"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(false)
   })
 
   // new table - feature flag on
@@ -190,16 +191,16 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     wrapper.vm.apiKeyList = [{ ...consumerKey[0], keyStatus: 'revoked' }]
     await Vue.nextTick()
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Revoked')
-    expect(wrapper.find('[data-test="confirm-button-mock-api-key-1234"]').exists()).toBe(false)
-    expect(wrapper.find('[data-test="delete-button-mock-api-key-1234"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(true)
   })
 
   it('Should show other statuses as is with no revoke or delete button', async () => {
     wrapper.vm.apiKeyList = [{ ...consumerKey[0], keyStatus: 'pending' }]
     await Vue.nextTick()
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Pending')
-    expect(wrapper.find('[data-test="confirm-button-mock-api-key-1234"]').exists()).toBe(false)
-    expect(wrapper.find('[data-test="delete-button-mock-api-key-1234"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(false)
   })
 
   it('Should open the confirmation modal for a delete on delete button click', async () => {
@@ -207,7 +208,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     await Vue.nextTick()
     wrapper.vm.$refs.confirmDeleteDialog = { open: vi.fn() }
 
-    wrapper.find('[data-test="delete-button-mock-api-key-1234"]').trigger('click')
+    wrapper.find('[data-test="delete-button"]').trigger('click')
     await Vue.nextTick()
 
     expect(wrapper.vm.selectedApi.apiKey).toBe('mock-api-key-1234')
@@ -381,7 +382,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     const stub = vi.fn(() => consumerKey)
     wrapper.setMethods({ confirmationModal: stub })
 
-    wrapper.find('[data-test="confirm-button-mock-api-key-1234"]').trigger('click')
+    wrapper.find('[data-test="confirm-button"]').trigger('click')
     await Vue.nextTick()
     await Vue.nextTick()
 
@@ -566,12 +567,46 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="new-api-key-chip"]').exists()).toBe(true)
   })
 
-  it('Should give each row its own action button tag', async () => {
+  describe('copying a key', () => {
+    let writeText: any
+    let emit: any
+
+    beforeEach(() => {
+      writeText = vi.fn(() => Promise.resolve())
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+      emit = vi.spyOn(EventBus, '$emit')
+    })
+
+    it('Should copy the full key and show a toast with the key name', async () => {
+      await wrapper.find('[data-test="copy-key-button"]').trigger('click')
+      await flushPromises()
+      expect(writeText).toHaveBeenCalledWith('mock-api-key-1234')
+      expect(emit).toHaveBeenCalledWith('show-toast', { message: 'API key copied: key1', type: 'default', timeout: 3000 })
+    })
+
+    it('Should escape the key name in the toast', async () => {
+      await wrapper.vm.copyApiKey({ apiKey: 'abc', apiKeyName: '<b>x</b>' })
+      expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key copied: &lt;b&gt;x&lt;/b&gt;' }))
+    })
+
+    it('Should not show the toast when the copy fails', async () => {
+      writeText.mockRejectedValue(new Error('denied'))
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      await wrapper.vm.copyApiKey(consumerKey[0])
+      expect(emit).not.toHaveBeenCalledWith('show-toast', expect.anything())
+    })
+  })
+
+  it('Should show an action button on each row', async () => {
     wrapper.vm.apiKeyList = [1, 2].map(day => ({ ...consumerKey[0], apiKey: `api-key-${day}`, apiKeyName: '' }))
     await Vue.nextTick()
 
-    expect(wrapper.find('[data-test="confirm-button-api-key-1"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="confirm-button-api-key-2"]').exists()).toBe(true)
+    expect(wrapper.findAll('[data-test="confirm-button"]').length).toBe(2)
+  })
+
+  it('Should not put the full key in any data-test tag', async () => {
+    const tags = wrapper.findAll('[data-test]').wrappers.map(el => el.attributes('data-test'))
+    expect(tags.some(tag => tag.includes('mock-api-key-1234'))).toBe(false)
   })
 
   describe('when the named key limit is reached on create', () => {

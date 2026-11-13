@@ -201,7 +201,23 @@
           </v-chip>
         </template>
         <template #[`item.apiKey`]="{ item }">
-          <span>{{ maskApiKey(item.apiKey) }}</span>
+          <div class="d-flex align-center masked-key">
+            <span>{{ maskApiKey(item.apiKey) }}</span>
+            <v-btn
+              v-if="item.apiKey"
+              icon
+              color="primary"
+              class="copy-key-btn"
+              aria-label="copy api key"
+              title="Copy API Key"
+              data-test="copy-key-button"
+              @click="copyApiKey(item)"
+            >
+              <v-icon size="20">
+                mdi-content-copy
+              </v-icon>
+            </v-btn>
+          </div>
         </template>
         <template #[`item.keyStatus`]="{ item }">
           <span data-test="key-status-chip">{{ getKeyStatusLabel(item) }}</span>
@@ -216,7 +232,7 @@
             depressed
             aria-label="Revoke"
             color="primary"
-            :data-test="getIndexedTag('confirm-button', item.apiKey)"
+            data-test="confirm-button"
             @click="confirmationModal(item)"
           >
             Revoke
@@ -227,7 +243,7 @@
             depressed
             aria-label="Delete"
             color="primary"
-            :data-test="getIndexedTag('delete-button', item.apiKey)"
+            data-test="delete-button"
             @click="confirmDelete(item)"
           >
             Delete
@@ -409,6 +425,7 @@
     <CreateApiKeySuccessModal
       ref="createKeySuccessModal"
       :api-key="generatedApiKey"
+      :api-key-name="generatedApiKeyName"
       :environment-label="apiKeysEnvironmentLabel"
     />
   </div>
@@ -425,6 +442,7 @@ import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { copyApiKeyToClipboard } from '@/util/api-key-util'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
@@ -459,6 +477,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public selectedApi: any = {}
   public revokedKeyName = ''
   public generatedApiKey = ''
+  public generatedApiKeyName = ''
 
   get isCreateApiKeyEnabled (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
@@ -673,6 +692,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       newKey.keyCreatedDate ??= new Date().toISOString()
       this.apiKeyList = [newKey, ...existingKeys]
       this.generatedApiKey = newKey.apiKey
+      this.generatedApiKeyName = this.getKeyName(newKey)
 
       this.closeCreateForm()
       await this.$nextTick()
@@ -742,9 +762,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     return this.isKeyNamed(item) ? item.apiKeyName.trim() : 'Unnamed Key'
   }
 
-  // mask the key as it is only shown once in success dialog
+  // mask the key for ui only, full key can be copied with the copy button
   public maskApiKey (key: string): string {
     return !key ? '' : `${'*'.repeat(4)}${key.slice(-4)}`
+  }
+
+  public async copyApiKey (item: any): Promise<void> {
+    await copyApiKeyToClipboard(item.apiKey, this.getKeyName(item))
   }
 
   public confirmationModal (apiKey) {
@@ -840,6 +864,14 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       margin-left: 0.25rem;
     }
   }
+}
+.masked-key {
+  margin: -10px 0;
+}
+
+.copy-key-btn.v-btn--icon {
+  width: 44px;
+  height: 44px;
 }
 // match the height of the large buttons (44px) next to the input
 .key-name-input ::v-deep .v-input__slot {
