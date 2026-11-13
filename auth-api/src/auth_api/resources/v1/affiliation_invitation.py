@@ -116,6 +116,7 @@ def post_unaffiliated_invitation(business_identifier):
         return {
             "contextUrl": AffiliationInvitationService.build_unaffiliated_context_url(invitation["token"]),
             "expiresOn": invitation.get("expires_on"),
+            "recipientEmail": invitation["recipient_email"],
         }, HTTPStatus.CREATED
     except BusinessException as exception:
         return {"code": exception.code, "message": exception.message}, exception.status_code

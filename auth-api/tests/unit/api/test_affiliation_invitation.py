@@ -1171,6 +1171,7 @@ def test_send_unaffiliated_email_invitation_returns_context_url(
     body = json.loads(rv.data)
     assert body["contextUrl"] == f"{registry_home_url}?preset=bcscUser&token={invitation.token}"
     assert body["expiresOn"]
+    assert body["recipientEmail"] == TestContactInfo.contact1["email"]
 
 
 def test_send_unaffiliated_email_invitation_send_email_false_skips_mailer(client, jwt, session, keycloak_mock):
