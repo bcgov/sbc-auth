@@ -217,10 +217,8 @@ def test_create_api_key_named_key_limit(
         mock_activity.assert_not_called()
     else:
         assert len(posted_urls) == 1
-        # the gateway response has no name here, so the requested name is logged
-        expected_name = (payload.get("apiKeyName") or payload.get("keyName") or "").strip()
         mock_activity.assert_called_once_with(
-            Activity(org_id=org_id, action=ActivityAction.API_KEY_CREATED.value, name=expected_name, value="...-key")
+            Activity(org_id=org_id, action=ActivityAction.API_KEY_CREATED.value, name=payload.get("apiKeyName", ""), value="...-key")
         )
 
 
