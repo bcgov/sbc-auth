@@ -121,12 +121,6 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
   private async mounted () {
     this.isLoading = true
     this.isFailed = false
-    try {
-      this.isPadRestricted = !!(await this.getOrgPayments())?.restrictPad
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error)
-    }
     let count = 0
     let timerId = setInterval(async () => {
       // eslint-disable-next-line no-console
@@ -147,6 +141,7 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
       this.isLoading = false
       this.isFailed = (this.currentOrganization?.statusCode !== AccountStatus.ACTIVE)
     }, this.TIMEOUT_DURATION)
+    this.isPadRestricted = !!(await this.getOrgPayments())?.restrictPad
   }
 }
 </script>
