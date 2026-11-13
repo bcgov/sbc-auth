@@ -82,9 +82,9 @@
 
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
+import { OrgPaymentDetails, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { OrgPaymentDetails, Organization } from '@/models/Organization'
 import { useOrgStore } from '@/stores/org'
 
 @Component({
