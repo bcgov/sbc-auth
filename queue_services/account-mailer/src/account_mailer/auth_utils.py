@@ -47,6 +47,12 @@ def get_vendor_connections_url(org_id: str) -> str:
     return connections_url
 
 
+def get_product_settings_url(org_id: str) -> str:
+    """Get products and payment settings url."""
+    web_app_url = current_app.config.get("WEB_APP_URL")
+    return f"{web_app_url}/account/{org_id}/settings/product-settings"
+
+
 def get_dashboard_url():
     """Get application dashboard url."""
     login_url = current_app.config.get("DASHBOARD_URL")

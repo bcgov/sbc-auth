@@ -24,6 +24,7 @@ from auth_api.services.rest_service import RestService
 from google.cloud import storage
 from sbc_common_components.utils.enums import QueueMessageTypes
 
+from account_mailer.auth_utils import get_product_settings_url
 from account_mailer.email_processors.pad_confirmation import _get_admin_emails
 from account_mailer.enums import SubjectType
 from account_mailer.services import notification_service
@@ -1140,3 +1141,11 @@ def test_payment_receipt_without_template_vars_skips_the_pdf(app, session, clien
 
     mock_report.assert_not_called()
     assert mock_send.call_args.args[0]["content"]["attachments"] == []
+
+
+def test_get_product_settings_url(app):
+    """Assert the products and payment settings url points at the org's product-settings page."""
+    with app.app_context(), patch.dict(app.config, {"WEB_APP_URL": "https://test.bcregistry.gov.bc.ca"}):
+        assert (
+            get_product_settings_url("123") == "https://test.bcregistry.gov.bc.ca/account/123/settings/product-settings"
+        )
