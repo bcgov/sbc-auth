@@ -248,6 +248,18 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
             "Expired a linking key for vendor account Super Vendor ABC (55)",
         ),
         (
+            ActivityAction.API_KEY_CREATED.value,
+            "Test Key",
+            "...09A1",
+            "Created API Key Test Key - ...09A1",
+        ),
+        (
+            ActivityAction.API_KEY_CREATED.value,
+            "",
+            "...09A1",
+            "Created Unnamed API Key - ...09A1",
+        ),
+        (
             ActivityAction.API_KEY_REVOKED.value,
             "Test Key",
             "...09A1",
