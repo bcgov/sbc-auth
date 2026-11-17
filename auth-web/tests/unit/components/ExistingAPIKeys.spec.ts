@@ -193,6 +193,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Revoked')
     expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="copy-key-button"]').exists()).toBe(false)
   })
 
   it('Should show other statuses as is with no revoke or delete button', async () => {
@@ -201,6 +202,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Pending')
     expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="copy-key-button"]').exists()).toBe(false)
   })
 
   it('Should open the confirmation modal for a delete on delete button click', async () => {
