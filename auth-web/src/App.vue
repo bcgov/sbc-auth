@@ -28,7 +28,17 @@
         class="mb-6"
         :timeout="toastTimeout"
       >
-        <span v-html="notificationText" />
+        <div class="d-flex align-center">
+          <v-icon
+            v-if="toastIcon"
+            :color="toastIconColor"
+            class="mr-4"
+            data-test="toast-icon"
+          >
+            {{ toastIcon }}
+          </v-icon>
+          <span v-html="notificationText" />
+        </div>
         <v-btn
           dark
           icon
@@ -120,6 +130,8 @@ export default class App extends Mixins(NextPageMixin) {
   showLoading = true
   toastType = 'primary'
   toastTimeout = 6000
+  toastIcon = ''
+  toastIconColor = ''
   logoutUrl = ''
 
   $refs: {
@@ -178,6 +190,7 @@ export default class App extends Mixins(NextPageMixin) {
     await this.syncUser()
     this.showLoading = false
     this.toastType = 'primary'
+    this.toastIcon = ''
     this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
     this.showNotification = true
 
@@ -195,6 +208,8 @@ export default class App extends Mixins(NextPageMixin) {
       this.notificationText = eventInfo.message
       this.toastType = eventInfo.type || 'primary'
       this.toastTimeout = eventInfo.timeout
+      this.toastIcon = eventInfo.icon || ''
+      this.toastIconColor = eventInfo.iconColor || ''
     })
 
     // set logout url after refresh
