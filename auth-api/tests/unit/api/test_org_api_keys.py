@@ -700,7 +700,7 @@ def _get_eligibility(client, org_id, headers):
     return client.get(f"/api/v1/orgs/{org_id}/api-keys/eligibility", headers=headers, content_type="application/json")
 
 
-@pytest.mark.parametrize("payment_method", ["PAD", "CC"])
+@pytest.mark.parametrize("payment_method", ["PAD"])
 def test_get_api_eligibility_eligible(
     client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, payment_method
 ):  # pylint:disable=unused-argument
@@ -719,12 +719,13 @@ def test_get_api_eligibility_eligible(
     }
 
 
+@pytest.mark.parametrize("payment_method", ["EJV", "CC"])
 def test_get_api_eligibility_ineligible_method(
-    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, payment_method
 ):  # pylint:disable=unused-argument
     """Assert that an account with payment method that's not allowed is not eligible for api service."""
     org_id, headers = _create_org_as_account_holder(client, jwt)
-    _mock_pay_account(monkeypatch, "EJV")
+    _mock_pay_account(monkeypatch, payment_method)
 
     rv = _get_eligibility(client, org_id, headers)
 
@@ -733,7 +734,7 @@ def test_get_api_eligibility_ineligible_method(
         "isApiEligible": False,
         "isAccountActive": True,
         "isPaymentMethodValid": False,
-        "paymentMethod": "EJV",
+        "paymentMethod": payment_method,
     }
 
 
