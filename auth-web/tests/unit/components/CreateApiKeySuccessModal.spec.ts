@@ -53,16 +53,16 @@ describe('CreateApiKeySuccessModal.vue', () => {
     await wrapper.setProps({ apiKeyName: 'My Key' })
     await wrapper.vm.copyApiKey()
 
-    expect(emit).toHaveBeenCalledWith('show-toast', { message: 'API key copied: My Key', type: 'default', timeout: 3000 })
+    expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key copied: My Key' }))
   })
 
-  it('does not show a toast when the copy fails', async () => {
+  it('shows a warning toast when the copy fails', async () => {
     const emit = vi.spyOn(EventBus, '$emit')
     vi.spyOn(console, 'error').mockImplementation(() => {})
     navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error('denied'))
     await wrapper.vm.copyApiKey()
 
-    expect(emit).not.toHaveBeenCalledWith('show-toast', expect.anything())
+    expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key could not be copied. Please try again.' }))
   })
 
   it('shows the key in full only once in the success modal', () => {

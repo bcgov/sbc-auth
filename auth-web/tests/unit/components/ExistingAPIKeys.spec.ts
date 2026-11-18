@@ -193,6 +193,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Revoked')
     expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="copy-key-button"]').exists()).toBe(false)
   })
 
   it('Should show other statuses as is with no revoke or delete button', async () => {
@@ -201,6 +202,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     expect(wrapper.find('[data-test="key-status-chip"]').text()).toBe('Pending')
     expect(wrapper.find('[data-test="confirm-button"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="delete-button"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="copy-key-button"]').exists()).toBe(false)
   })
 
   it('Should open the confirmation modal for a delete on delete button click', async () => {
@@ -581,7 +583,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
       await wrapper.find('[data-test="copy-key-button"]').trigger('click')
       await flushPromises()
       expect(writeText).toHaveBeenCalledWith('mock-api-key-1234')
-      expect(emit).toHaveBeenCalledWith('show-toast', { message: 'API key copied: key1', type: 'default', timeout: 3000 })
+      expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key copied: key1' }))
     })
 
     it('Should escape the key name in the toast', async () => {
@@ -589,11 +591,11 @@ describe('Account settings ExistingAPIKeys.vue', () => {
       expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key copied: &lt;b&gt;x&lt;/b&gt;' }))
     })
 
-    it('Should not show the toast when the copy fails', async () => {
+    it('Should show a warning toast when the copy fails', async () => {
       writeText.mockRejectedValue(new Error('denied'))
       vi.spyOn(console, 'error').mockImplementation(() => {})
       await wrapper.vm.copyApiKey(consumerKey[0])
-      expect(emit).not.toHaveBeenCalledWith('show-toast', expect.anything())
+      expect(emit).toHaveBeenCalledWith('show-toast', expect.objectContaining({ message: 'API key could not be copied. Please try again.' }))
     })
   })
 

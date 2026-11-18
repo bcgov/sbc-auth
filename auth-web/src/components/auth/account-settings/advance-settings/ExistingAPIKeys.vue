@@ -203,8 +203,9 @@
         <template #[`item.apiKey`]="{ item }">
           <div class="d-flex align-center masked-key">
             <span>{{ maskApiKey(item.apiKey) }}</span>
+            <!-- only active keys can be copied -->
             <v-btn
-              v-if="item.apiKey"
+              v-if="item.apiKey && isKeyActive(item)"
               icon
               color="primary"
               class="copy-key-btn"
