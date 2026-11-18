@@ -36,7 +36,10 @@
               </v-icon>
               <h3 class="title font-weight-bold mt-n1 payment-title">
                 {{ payment.title }}
-                <span v-if="!payment.supported">
+                <span v-if="payment.restricted">
+                  is not available for this account
+                </span>
+                <span v-else-if="!payment.supported">
                   is not supported for the selected products
                 </span>
               </h3>

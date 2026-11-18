@@ -170,6 +170,11 @@ export const useProductPayment = (props = null, state = null) => {
       const paymentMethod = PAYMENT_METHODS[paymentType]
       if (paymentMethod && methodSupportPerProduct) {
         paymentMethod.supported = methodSupportPerProduct[paymentType]
+        paymentMethod.restricted = paymentType === PaymentTypes.PAD && !props.isCreateAccount &&
+          !!orgStore.currentOrgPaymentDetails?.restrictPad
+        if (paymentMethod.restricted) {
+          paymentMethod.supported = false
+        }
         if (props.isCreateAccount) {
           if (orgStore.currentSelectedProducts?.length === 0) {
             paymentMethod.supported = false

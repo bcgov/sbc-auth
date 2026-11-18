@@ -240,6 +240,7 @@ export interface OrgPaymentDetails {
   futurePaymentMethod: string
   revenueAccount?: GLInfo
   eftEnable?: boolean
+  restrictPad?: boolean
   accountFees?: AccountFee[]
 }
 

@@ -16,6 +16,7 @@
 from flask import current_app
 from jinja2 import Template
 
+from account_mailer.auth_utils import get_product_settings_url
 from account_mailer.email_processors import generate_template
 from account_mailer.email_processors.utils import get_account_info
 from account_mailer.pdf_utils import get_pdf_from_report_api
@@ -52,6 +53,8 @@ def _get_account_unlock_email(data):
         logo_url=data.get("logo_url"),
         account_name_with_branch=account_name_with_branch,
         account_number=org_id,
+        restrict_pad=(data.get("template_vars") or {}).get("restrictPad", False),
+        product_settings_url=get_product_settings_url(org_id),
     )
     return html_out
 

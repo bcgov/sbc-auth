@@ -165,6 +165,7 @@ export default defineComponent({
       errorText: string;
       isLoading: boolean;
       hasEFTPaymentMethod: boolean;
+      isPadRestricted: boolean;
       isViewLoading: boolean;
       stepperConfig: StepConfiguration[];
       isAccountStatusNsfSuspended: boolean;
@@ -173,6 +174,7 @@ export default defineComponent({
       errorText: '',
       isLoading: false,
       hasEFTPaymentMethod: false,
+      isPadRestricted: false,
       isViewLoading: true,
       stepperConfig: [],
       isAccountStatusNsfSuspended: false
@@ -213,6 +215,7 @@ export default defineComponent({
         const orgPayments: OrgPaymentDetails = await getOrgPayments()
         const paymentMethod = orgPayments.paymentMethod === PaymentTypes.EFT
         state.hasEFTPaymentMethod = paymentMethod
+        state.isPadRestricted = !!orgPayments.restrictPad
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error)
@@ -287,6 +290,10 @@ export default defineComponent({
             componentProps: {}
           }
         ]
+        // PAD is blocked for this account, so skip the bank details step.
+        if (state.isPadRestricted) {
+          state.stepperConfig = state.stepperConfig.filter(step => step.component !== ReviewBankInformation)
+        }
       }
       state.isViewLoading = false
       setTimeout(async () => {
