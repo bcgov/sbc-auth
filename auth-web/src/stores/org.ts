@@ -334,6 +334,10 @@ export const useOrgStore = defineStore('org', () => {
       membershipType: MembershipType.ExternalStaff
     },
     {
+      role: Role.SbcFinanceStaff,
+      membershipType: MembershipType.SbcFinanceStaff
+    },
+    {
       role: Role.StaffManageAccounts,
       membershipType: MembershipType.Staff
     }
@@ -358,7 +362,7 @@ export const useOrgStore = defineStore('org', () => {
     const { accountStatus: statusCode } = state.currentAccountSettings
 
     let includeAllPermissions = false
-    if (roles.includes(Role.Staff) || (roles.includes(Role.ExternalStaffReadonly) && !membership?.id)) {
+    if (roles.includes(Role.Staff) || (CommonUtils.isReadonlyStaff(roles) && !membership?.id)) {
       includeAllPermissions = true
     }
 

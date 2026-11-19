@@ -3563,3 +3563,48 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     orgs = json.loads(rv.data)
     assert orgs.get("total") == 1
     assert orgs.get("orgs")[0].get("id") == org1.id
+
+
+@pytest.mark.parametrize("endpoint", ["", "/login-options", "/activity-logs", "/products"])
+@pytest.mark.parametrize(
+    "claims, expected_status",
+    [
+        (TestJwtClaims.external_staff_readonly_role, HTTPStatus.OK),
+        (TestJwtClaims.sbc_finance_staff_role, HTTPStatus.OK),
+        (TestJwtClaims.view_accounts_without_readonly_staff_role, HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_readonly_staff_can_read_non_member_org(client, jwt, session, endpoint, claims, expected_status):
+    """Assert read-only staff can read an org they are not a member of."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f"/api/v1/orgs/{org.id}{endpoint}", headers=headers, content_type="application/json")
+
+    assert rv.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    "claims, expect_members",
+    [
+        (TestJwtClaims.external_staff_readonly_role, True),
+        (TestJwtClaims.sbc_finance_staff_role, True),
+        (TestJwtClaims.view_accounts_without_readonly_staff_role, False),
+    ],
+)
+def test_readonly_staff_can_read_non_member_org_members(client, jwt, session, claims, expect_members):
+    """Assert read-only staff get the member list of an org they are not a member."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f"/api/v1/orgs/{org.id}/members", headers=headers, content_type="application/json")
+
+    assert rv.status_code == HTTPStatus.OK
+    assert ("members" in rv.json) is expect_members

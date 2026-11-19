@@ -11,7 +11,7 @@
 
 <script lang="ts">
 
-import { AccessType, AccountStatus, ExternalStaffAccounts, LoginSource, Pages } from '@/util/constants'
+import { AccessType, AccountStatus, LoginSource, Pages, ReadonlyStaffAccounts } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { defineComponent, getCurrentInstance, onMounted, reactive, toRefs } from '@vue/composition-api'
 import ConfigHelper from '@/util/config-helper'
@@ -105,8 +105,8 @@ export default defineComponent({
     }
 
     function redirectToNextPage (invitingOrg) {
-      const isExternalStaff = ExternalStaffAccounts.includes(invitingOrg.typeCode)
-      if (invitingOrg.statusCode === AccountStatus.ACTIVE && isExternalStaff) {
+      const isReadonlyStaff = ReadonlyStaffAccounts.includes(invitingOrg.typeCode)
+      if (invitingOrg.statusCode === AccountStatus.ACTIVE && isReadonlyStaff) {
         window.location.assign(`${ConfigHelper.getSelfURL()}${Pages.STAFF_DASHBOARD}`)
       } else {
         const redirectUrl = mixinProxy.getNextPageUrl()

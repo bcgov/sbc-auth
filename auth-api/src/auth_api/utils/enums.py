@@ -106,6 +106,7 @@ class OrgType(Enum):
     SBC_STAFF = "SBC_STAFF"
     MAXIMUS_STAFF = "MAXIMUS_STAFF"
     CC_STAFF = "CC_STAFF"
+    SBC_FINANCE_STAFF = "SBC_FIN_STAFF"
 
 
 class DocumentType(Enum):

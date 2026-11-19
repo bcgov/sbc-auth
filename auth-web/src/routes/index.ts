@@ -6,10 +6,12 @@ import {
   LoginSource,
   Pages,
   Permission,
+  ReadonlyStaffRoles,
   Role, SessionStorageKeys
 } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { AccountSettings } from '@/models/account-settings'
+import CommonUtils from '@/util/common-util'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import Router from 'vue-router'
@@ -44,7 +46,7 @@ router.beforeEach(async (to, from, next) => {
         })
       }
     } else {
-      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, Role.ExternalStaffReadonly].includes(to.meta.allowedRoles[0])) {
+      if (to.meta.allowedRoles?.length === 1 && [Role.Staff, ...ReadonlyStaffRoles].includes(to.meta.allowedRoles[0])) {
         return next({
           path: `/signin/idir${to.path}`,
           query: { redirect: to.fullPath }
@@ -142,7 +144,7 @@ router.beforeEach(async (to, from, next) => {
     // need to check for govm account also. so we are checking roles
     if (to.matched.some(record => record.meta.requiresActiveAccount) &&
         ((currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID ||
-          currentUser.roles.includes(Role.GOVMAccountUser)) && !currentUser.roles.includes(Role.ExternalStaffReadonly))) {
+          currentUser.roles.includes(Role.GOVMAccountUser)) && !CommonUtils.isReadonlyStaff(currentUser.roles))) {
       // if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED].some(status => status === currentOrganization?.statusCode)) {
         console.log('[NG] Redirecting user to Account Freeze message since the account is temporarly suspended.')

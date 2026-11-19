@@ -22,7 +22,12 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from werkzeug.exceptions import Forbidden, HTTPException
 
-from auth_api.services.authorization import Authorization, check_auth, linking_key_authorizes
+from auth_api.services.authorization import (
+    Authorization,
+    check_auth,
+    is_competent_authority_or_readonly_staff,
+    linking_key_authorizes,
+)
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
@@ -800,3 +805,18 @@ def test_linking_key_authorizes_returns_false_when_no_key(session, monkeypatch):
     )
 
     assert linking_key_authorizes(org.id) is False
+
+
+@pytest.mark.parametrize(
+    "claims, expected",
+    [
+        (TestJwtClaims.external_staff_readonly_role, True),
+        (TestJwtClaims.sbc_finance_staff_role, True),
+        (TestJwtClaims.view_accounts_without_readonly_staff_role, False),
+    ],
+)
+def test_is_competent_authority_or_readonly_staff(session, monkeypatch, claims, expected):
+    """Assert read-only staff is allowed for competent authority check."""
+    patch_token_info(claims, monkeypatch)
+
+    assert is_competent_authority_or_readonly_staff() is expected

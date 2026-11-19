@@ -413,7 +413,8 @@ export default defineComponent({
       isBusinessAccount: computed(() => orgStore.isBusinessAccount),
       baseAddress: computed(() => currentOrgAddress.value),
 
-      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff)) || userStore.currentUser.roles.includes(Role.ExternalStaffReadonly),
+      isStaff: computed(() => userStore.currentUser.roles.includes(Role.Staff) ||
+        CommonUtils.isReadonlyStaff(userStore.currentUser.roles)),
       isSuspendButtonVisible: computed(() => (
         (currentOrganization.value.statusCode === AccountStatus.ACTIVE ||
         currentOrganization.value.statusCode === AccountStatus.SUSPENDED) &&
@@ -437,7 +438,7 @@ export default defineComponent({
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
       nameChangeNotAllowed: computed(() => (isGovmAccount.value)) &&
-      userStore.currentUser.roles.includes(Role.ExternalStaffReadonly)
+      CommonUtils.isReadonlyStaff(userStore.currentUser.roles)
     })
 
     const suspensionSelectRules = [
