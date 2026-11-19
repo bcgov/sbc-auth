@@ -29,11 +29,9 @@ from auth_api.services.api_terms import ApiTerms as ApiTermsService
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
-from auth_api.services.pay import PayApi
 from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import (
-    API_ELIGIBLE_PAYMENT_METHODS,
     GROUP_ACCOUNT_HOLDERS,
     GROUP_API_GW_SANDBOX_USERS,
     GROUP_API_GW_USERS,
@@ -323,21 +321,11 @@ class ApiGateway:
 
     @classmethod
     def _eligibility(cls, org: OrgModel) -> dict:
-        """Return the org's eligibility, it has to be active and use one of the eligible payment methods."""
+        """Return the org's eligibility, it has to be active."""
         is_account_active = org.status_code == OrgStatus.ACTIVE.value
-        if cls._normalize_environment(current_app.config.get("ENVIRONMENT_NAME")) != "prod":
-            # in sandbox - check only for active account
-            is_api_eligible, payment_method, is_payment_method_valid = is_account_active, None, None
-        else:
-            # in prod - check all criteria
-            payment_method = PayApi.get_payment_method(org.id)
-            is_payment_method_valid = payment_method in API_ELIGIBLE_PAYMENT_METHODS
-            is_api_eligible = is_account_active and is_payment_method_valid
         return {
-            "isApiEligible": is_api_eligible,
+            "isApiEligible": is_account_active,
             "isAccountActive": is_account_active,
-            "isPaymentMethodValid": is_payment_method_valid,
-            "paymentMethod": payment_method,
         }
 
     @classmethod

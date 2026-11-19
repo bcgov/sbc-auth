@@ -13,7 +13,7 @@
 # limitations under the License.
 """Constants definitions."""
 
-from auth_api.utils.enums import PaymentMethod, ProductCode
+from auth_api.utils.enums import ProductCode
 
 # Group names
 GROUP_PUBLIC_USERS = "public_users"
@@ -59,6 +59,3 @@ BCOL_PROFILE_PRODUCT_MAP = {
 
 # maximum number of named api keys an org can have including active and revoked keys
 MAX_NAMED_API_KEYS = 10
-
-# payment methods to be eligible for api access
-API_ELIGIBLE_PAYMENT_METHODS = (PaymentMethod.PAD.value,)

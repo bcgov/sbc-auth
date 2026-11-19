@@ -133,7 +133,6 @@ class Error(Enum):
         HTTPStatus.BAD_REQUEST,
     )
     ACCOUNT_FEES_FETCH_FAILED = "Failed to fetch account fees from Pay API", HTTPStatus.INTERNAL_SERVER_ERROR
-    PAY_ACCOUNT_FETCH_FAILED = "Failed to fetch account from Pay API", HTTPStatus.INTERNAL_SERVER_ERROR
     GOVM_ACCOUNT_DATA_MISSING = (
         "GOVM account creation needs payment info , gl code and mailing address",
         HTTPStatus.BAD_REQUEST,
@@ -192,7 +191,7 @@ class Error(Enum):
         HTTPStatus.BAD_REQUEST,
     )
     API_ACCESS_NOT_ELIGIBLE = (
-        "Account is not eligible for API access. The account must be active and have a valid payment method.",
+        "Account is not eligible for API access. The account must be active.",
         HTTPStatus.BAD_REQUEST,
     )
 

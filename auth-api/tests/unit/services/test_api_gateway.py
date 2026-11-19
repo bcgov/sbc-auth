@@ -11,7 +11,6 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.org_api_terms_acceptance import OrgApiTermsAcceptance as OrgApiTermsAcceptanceModel
 from auth_api.services.api_gateway import ApiGateway
 from auth_api.services.keycloak import KeycloakService
-from auth_api.services.pay import PayApi
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import MAX_NAMED_API_KEYS
 from auth_api.utils.enums import DocumentType, OrgStatus
@@ -159,29 +158,35 @@ def test_create_key_named_limit_reached(session, monkeypatch):  # pylint:disable
     gateway_post.assert_not_called()
 
 
-def _setup_api_key_in_env(monkeypatch, env_name, payment_method=None, claims_roles=("public_user", "account_holder")):
+def _setup_api_key_in_env(monkeypatch, env_name, claims_roles=("public_user", "account_holder")):
     """Set up api key for an account holder who accepted the terms."""
     document = factory_document_model("k01", DocumentType.TERMS_OF_USE_API.value, "<p>Terms</p>")
     org, gateway_post = _setup_create_key(monkeypatch, list(claims_roles), "ADMIN")
     OrgApiTermsAcceptanceModel(org_id=org.id, version_id=document.version_id).save()
     monkeypatch.setitem(current_app.config, "ENVIRONMENT_NAME", env_name)
-    monkeypatch.setattr(PayApi, "get_payment_method", Mock(return_value=payment_method))
     return org, gateway_post
 
 
-def test_create_key_prod_eligible(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert a prod key is created for an active org with an eligible payment method."""
-    org, gateway_post = _setup_api_key_in_env(monkeypatch, "prod", "PAD")
+def _suspend(org):
+    org.status_code = OrgStatus.SUSPENDED.value
+    org.save()
+
+
+@pytest.mark.parametrize("env_name", ["prod", "production", "sandbox"])
+def test_create_key_active_account(session, monkeypatch, env_name):  # pylint:disable=unused-argument
+    """Assert a key is created for an active org."""
+    org, gateway_post = _setup_api_key_in_env(monkeypatch, env_name)
 
     ApiGateway.create_key(org.id, {"keyName": "TEST"})
 
     gateway_post.assert_called_once()
 
 
-@pytest.mark.parametrize("env_name", ["prod", "production"])
-def test_create_key_prod_not_eligible(session, monkeypatch, env_name):  # pylint:disable=unused-argument
-    """Assert that a prod key isn't created for an org that isn't eligible."""
-    org, gateway_post = _setup_api_key_in_env(monkeypatch, env_name, "EJV")
+@pytest.mark.parametrize("env_name", ["prod", "production", "sandbox"])
+def test_create_key_inactive_account(session, monkeypatch, env_name):  # pylint:disable=unused-argument
+    """Assert that a key isn't created for an inactive org."""
+    org, gateway_post = _setup_api_key_in_env(monkeypatch, env_name)
+    _suspend(org)
 
     with pytest.raises(BusinessException) as exc_info:
         ApiGateway.create_key(org.id, {"keyName": "TEST"})
@@ -190,49 +195,19 @@ def test_create_key_prod_not_eligible(session, monkeypatch, env_name):  # pylint
     gateway_post.assert_not_called()
 
 
-def test_create_key_prod_eligibility_skipped_for_system(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that eligibility isn't checked for system callers creating prod keys."""
-    org, gateway_post = _setup_api_key_in_env(monkeypatch, "prod", "EJV", claims_roles=("system",))
+def test_create_key_eligibility_skipped_for_system(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that eligibility isn't checked for system callers."""
+    org, gateway_post = _setup_api_key_in_env(monkeypatch, "prod", claims_roles=("system",))
+    _suspend(org)
 
     ApiGateway.create_key(org.id, {"keyName": "TEST"})
 
-    PayApi.get_payment_method.assert_not_called()
     gateway_post.assert_called_once()
 
 
 def test_get_eligibility_inactive_account(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an inactive org isn't eligible, even with an eligible payment method."""
-    org, _ = _setup_api_key_in_env(monkeypatch, "prod", "PAD")
-    org.status_code = OrgStatus.SUSPENDED.value
-    org.save()
+    """Assert that an inactive org isn't eligible."""
+    org, _ = _setup_api_key_in_env(monkeypatch, "prod")
+    _suspend(org)
 
-    assert ApiGateway.get_eligibility(org.id) == {
-        "isApiEligible": False,
-        "isAccountActive": False,
-        "isPaymentMethodValid": True,
-        "paymentMethod": "PAD",
-    }
-
-
-def test_create_key_sandbox_account_status_checked(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert the only account status is checked for pay-api in sandbox env."""
-    org, gateway_post = _setup_api_key_in_env(monkeypatch, "sandbox")
-
-    ApiGateway.create_key(org.id, {"keyName": "TEST"})
-
-    PayApi.get_payment_method.assert_not_called()
-    gateway_post.assert_called_once()
-
-
-def test_create_key_sandbox_inactive_account(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that a sandbox key not created for an inactive account."""
-    org, gateway_post = _setup_api_key_in_env(monkeypatch, "sandbox")
-    org.status_code = OrgStatus.SUSPENDED.value
-    org.save()
-
-    with pytest.raises(BusinessException) as exc_info:
-        ApiGateway.create_key(org.id, {"keyName": "TEST"})
-
-    assert exc_info.value.code == Error.API_ACCESS_NOT_ELIGIBLE.name
-    PayApi.get_payment_method.assert_not_called()
-    gateway_post.assert_not_called()
+    assert ApiGateway.get_eligibility(org.id) == {"isApiEligible": False, "isAccountActive": False}
