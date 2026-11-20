@@ -26,7 +26,12 @@ from faker import Faker
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
+from auth_api.utils.constants import (
+    GROUP_CONTACT_CENTRE_STAFF,
+    GROUP_MAXIMUS_STAFF,
+    GROUP_SBC_FINANCE_STAFF,
+    GROUP_SBC_STAFF,
+)
 from auth_api.utils.enums import LoginSource, OrgType
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import CONFIG, KeycloakScenario, TestJwtClaims, TestOrgInfo
@@ -95,6 +100,7 @@ def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, 
         (GROUP_MAXIMUS_STAFF, OrgType.MAXIMUS_STAFF.value),
         (GROUP_CONTACT_CENTRE_STAFF, OrgType.CC_STAFF.value),
         (GROUP_SBC_STAFF, OrgType.SBC_STAFF.value),
+        (GROUP_SBC_FINANCE_STAFF, OrgType.SBC_FINANCE_STAFF.value),
     ],
 )
 def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, session, disable_org_update_listener):

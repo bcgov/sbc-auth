@@ -33,6 +33,7 @@ import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affidavit as AffidavitModel
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
@@ -79,6 +80,7 @@ from tests.utilities.factory_scenarios import (
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
+    factory_affiliation_model,
     factory_auth_header,
     factory_entity_model,
     factory_invitation,
@@ -3563,3 +3565,158 @@ def test_search_org_suspended_filters(client, jwt, session, keycloak_mock):  # p
     orgs = json.loads(rv.data)
     assert orgs.get("total") == 1
     assert orgs.get("orgs")[0].get("id") == org1.id
+
+
+@pytest.mark.parametrize("endpoint", ["", "/login-options", "/activity-logs", "/products"])
+@pytest.mark.parametrize(
+    "claims, expected_status",
+    [
+        (TestJwtClaims.external_staff_readonly_role, HTTPStatus.OK),
+        (TestJwtClaims.sbc_finance_staff_role, HTTPStatus.OK),
+        (TestJwtClaims.view_accounts_without_readonly_staff_role, HTTPStatus.FORBIDDEN),
+    ],
+)
+def test_readonly_staff_can_read_non_member_org(client, jwt, session, endpoint, claims, expected_status):
+    """Assert read-only staff can read an org they are not a member of."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f"/api/v1/orgs/{org.id}{endpoint}", headers=headers, content_type="application/json")
+
+    assert rv.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    "claims, expect_members",
+    [
+        (TestJwtClaims.external_staff_readonly_role, True),
+        (TestJwtClaims.sbc_finance_staff_role, True),
+        (TestJwtClaims.view_accounts_without_readonly_staff_role, False),
+    ],
+)
+def test_readonly_staff_can_read_non_member_org_members(client, jwt, session, claims, expect_members):
+    """Assert read-only staff get the member list of an org they are not a member."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f"/api/v1/orgs/{org.id}/members", headers=headers, content_type="application/json")
+
+    assert rv.status_code == HTTPStatus.OK
+    assert ("members" in rv.json) is expect_members
+
+
+@pytest.mark.parametrize(
+    "claims, is_member, expected_status",
+    [
+        (TestJwtClaims.sbc_finance_staff_role, False, HTTPStatus.FORBIDDEN),
+        (TestJwtClaims.sbc_finance_staff_role, True, HTTPStatus.OK),
+        (TestJwtClaims.external_staff_readonly_role, False, HTTPStatus.OK),
+    ],
+)
+def test_other_staff_types_delete_affiliation(client, jwt, session, keycloak_mock, claims, is_member, expected_status):
+    """Assert other staff type delete affiliations permissions."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.delete(
+        f"/api/v1/orgs/{org.id}/affiliations/{entity.business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org.id, entity.id)
+    if expected_status == HTTPStatus.OK:
+        assert affiliation is None
+    else:
+        assert affiliation is not None
+
+
+@pytest.mark.parametrize(
+    "is_member, expected_status",
+    [
+        (False, HTTPStatus.FORBIDDEN),
+        (True, HTTPStatus.CREATED),
+    ],
+)
+def test_finance_staff_create_affiliation(
+    client, jwt, session, keycloak_mock, entity_mapping_mock, is_member, expected_status
+):
+    """Assert finance staff can only create affiliations on their own org."""
+    claims = TestJwtClaims.sbc_finance_staff_role
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.post(
+        f"/api/v1/orgs/{org.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org.id, entity.id)
+    if expected_status == HTTPStatus.CREATED:
+        assert affiliation is not None
+    else:
+        assert affiliation is None
+
+
+@pytest.mark.parametrize(
+    "is_member, expected_status",
+    [
+        (False, HTTPStatus.FORBIDDEN),
+        (True, HTTPStatus.OK),
+    ],
+)
+def test_finance_staff_update_mailing_address(client, jwt, session, keycloak_mock, is_member, expected_status):
+    """Assert finance staff can only update the mailing address on their own org."""
+    claims = TestJwtClaims.sbc_finance_staff_role
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    mailing_address = TestOrgInfo.get_mailing_address()
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.put(
+        f"/api/v1/orgs/{org.id}/mailing-address",
+        headers=headers,
+        data=json.dumps({"mailingAddress": mailing_address}),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    contacts = OrgModel.find_by_org_id(org.id).contacts
+    if expected_status == HTTPStatus.OK:
+        assert contacts[0].contact.street == mailing_address["street"]
+    else:
+        assert not contacts

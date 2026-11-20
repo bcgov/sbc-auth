@@ -445,7 +445,7 @@ class Affiliation:
 
         entity = EntityService.find_by_business_identifier(
             da.business_identifier,
-            skip_auth=user_from_context.is_staff() or user_from_context.is_external_staff(),
+            skip_auth=user_from_context.is_staff() or user_from_context.is_readonly_staff(),
             allowed_roles=(CLIENT_AUTH_ROLES),
         )
         if entity is None:

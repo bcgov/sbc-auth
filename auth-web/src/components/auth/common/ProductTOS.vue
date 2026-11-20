@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs, watch } from '@vue/composition-api'
-import { Role } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
@@ -69,7 +69,7 @@ export default defineComponent({
     const state = reactive({
       termsAccepted: false,
       istosTouched: false,
-      canAcceptTos: computed(() => !userStore?.currentUser?.roles.includes(Role.ExternalStaffReadonly))
+      canAcceptTos: computed(() => !CommonUtils.isReadonlyStaff(userStore?.currentUser?.roles))
     })
 
     watch(() => props.isTOSAlreadyAccepted, (newTos, oldTos) => {

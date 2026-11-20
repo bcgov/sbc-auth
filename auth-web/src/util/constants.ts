@@ -60,8 +60,11 @@ export enum Role {
     FasRefund = 'fas_refund',
     BcolStaffAdmin = 'bcol_staff_admin',
     ExternalStaffReadonly = 'external_staff_readonly',
+    SbcFinanceStaff = 'sbc_finance_staff',
     ViewStaffDashboard = 'view_staff_dashboard'
 }
+
+export const ReadonlyStaffRoles: string[] = [Role.ExternalStaffReadonly, Role.SbcFinanceStaff]
 
 export enum Pages {
     USER_PROFILE = 'userprofile',
@@ -118,10 +121,11 @@ export enum Account {
     STAFF = 'STAFF',
     SBC_STAFF = 'SBC_STAFF',
     MAXIMUS_STAFF = 'MAXIMUS_STAFF',
-    CONTACT_CENTRE_STAFF = 'CC_STAFF'
+    CONTACT_CENTRE_STAFF = 'CC_STAFF',
+    SBC_FINANCE_STAFF = 'SBC_FIN_STAFF'
 }
 
-export const ExternalStaffAccounts = [Account.MAXIMUS_STAFF, Account.CONTACT_CENTRE_STAFF]
+export const ReadonlyStaffAccounts = [Account.MAXIMUS_STAFF, Account.CONTACT_CENTRE_STAFF, Account.SBC_FINANCE_STAFF]
 
 export enum AccountStatus {
     ACTIVE = 'ACTIVE',

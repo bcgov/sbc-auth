@@ -253,7 +253,8 @@ export default defineComponent({
         { code: OrgAccountTypes.DIRECTOR_SEARCH, description: 'Director Search' },
         { code: OrgAccountTypes.STAFF, description: 'BC Registries Staff' },
         { code: OrgAccountTypes.SBC_STAFF, description: 'Service BC Staff' },
-        { code: OrgAccountTypes.MAXIMUS_STAFF, description: 'Maximus Staff' }
+        { code: OrgAccountTypes.MAXIMUS_STAFF, description: 'Maximus Staff' },
+        { code: OrgAccountTypes.SBC_FINANCE_STAFF, description: 'SBC Finance Staff' }
       ],
       dateTxt: '',
       showDatePicker: false,

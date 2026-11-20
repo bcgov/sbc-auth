@@ -6,6 +6,7 @@ import {
   VendorConnectionStatuses
 } from '@/models/vendorConnection'
 import { LDFlags, Role } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
 import { MembershipType } from '@/models/Organization'
 import { getLdFlag } from '@/util/flag-util'
 import moment from 'moment'
@@ -23,7 +24,7 @@ function hasLinkingKeysJwtRole (userRoles: string[] = []): boolean {
 
 function isStaffUser (userRoles: string[] = []): boolean {
   return userRoles.includes(Role.Staff) ||
-    userRoles.includes(Role.ExternalStaffReadonly)
+    CommonUtils.isReadonlyStaff(userRoles)
 }
 
 function isOrgMember (membershipTypeCode: MembershipType | undefined): boolean {
@@ -46,7 +47,7 @@ function isStaffWithManageAccounts (userRoles: string[] = []): boolean {
     return false
   }
   return userRoles.includes(Role.Staff) ||
-    userRoles.includes(Role.ExternalStaffReadonly)
+    CommonUtils.isReadonlyStaff(userRoles)
 }
 
 /**

@@ -5,7 +5,7 @@ import {
   RegistryHomeBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
-import { Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Pages, ReadonlyStaffRoles, Role, SessionStorageKeys } from '@/util/constants'
 
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
@@ -441,7 +441,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/review-account/:orgId',
       name: 'review-account',
       component: ReviewAccountView,
-      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts, Role.ExternalStaffReadonly] },
+      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts, ...ReadonlyStaffRoles] },
       props: true
     },
     {

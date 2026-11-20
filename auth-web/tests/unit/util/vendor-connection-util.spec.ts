@@ -85,6 +85,15 @@ describe('vendor-connection-util', () => {
         [Role.ExternalStaffReadonly, Role.StaffManageAccounts]
       )).toBe(true)
     })
+
+    it('returns false for sbc finance staff without manage_accounts role', () => {
+      setDisableAccountLinkingFlag(false)
+
+      expect(canViewVendorConnections(
+        undefined,
+        [Role.SbcFinanceStaff, Role.StaffViewAccounts]
+      )).toBe(false)
+    })
   })
 
   describe('canManageVendorConnections', () => {
