@@ -48,6 +48,7 @@ from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import (  # noqa: I001
     AFFILIATION_ALLOWED_ROLES,
     ALL_ALLOWED_ROLES,
+    ALLOWED_READ_ROLES,
     CLIENT_ADMIN_ROLES,
     STAFF,
     USER,
@@ -176,7 +177,7 @@ def post_organization():
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_organization(org_id):
     """Get the org specified by the provided id."""
-    org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
+    org = OrgService.find_by_org_id(org_id, allowed_roles=ALLOWED_READ_ROLES)
     if org is None:
         response, status = {"message": "The requested organization could not be found."}, HTTPStatus.NOT_FOUND
     else:
@@ -451,7 +452,7 @@ def post_organization_affiliation(org_id, **kwargs):
     # the affiliation must be created against the source org the key was issued for.
     user: UserContext = kwargs["user_context"]
     affiliation_org_id = org_id
-    skip_membership_check = _jwt.has_one_of_roles([Role.SKIP_AFFILIATION_AUTH.value])
+    skip_membership_check = user.has_role(Role.SKIP_AFFILIATION_AUTH.value)
     if linking_key := user.linking_key:
         linked = LinkingKeyService.validate(linking_key, org_id)
         if not linked:

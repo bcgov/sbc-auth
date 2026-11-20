@@ -33,6 +33,7 @@ import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affidavit as AffidavitModel
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
@@ -79,6 +80,7 @@ from tests.utilities.factory_scenarios import (
 )
 from tests.utilities.factory_utils import (
     convert_org_to_staff_org,
+    factory_affiliation_model,
     factory_auth_header,
     factory_entity_model,
     factory_invitation,
@@ -3608,3 +3610,77 @@ def test_readonly_staff_can_read_non_member_org_members(client, jwt, session, cl
 
     assert rv.status_code == HTTPStatus.OK
     assert ("members" in rv.json) is expect_members
+
+
+@pytest.mark.parametrize(
+    "claims, is_member, expected_status",
+    [
+        (TestJwtClaims.sbc_finance_staff_role, False, HTTPStatus.FORBIDDEN),
+        (TestJwtClaims.sbc_finance_staff_role, True, HTTPStatus.OK),
+        (TestJwtClaims.external_staff_readonly_role, False, HTTPStatus.OK),
+    ],
+)
+def test_other_staff_types_delete_affiliation(client, jwt, session, keycloak_mock, claims, is_member, expected_status):
+    """Assert other staff type delete affiliations permissions."""
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.delete(
+        f"/api/v1/orgs/{org.id}/affiliations/{entity.business_identifier}",
+        headers=headers,
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org.id, entity.id)
+    if expected_status == HTTPStatus.OK:
+        assert affiliation is None
+    else:
+        assert affiliation is not None
+
+
+@pytest.mark.parametrize(
+    "is_member, expected_status",
+    [
+        (False, HTTPStatus.FORBIDDEN),
+        (True, HTTPStatus.CREATED),
+    ],
+)
+def test_finance_staff_create_affiliation(
+    client, jwt, session, keycloak_mock, entity_mapping_mock, is_member, expected_status
+):
+    """Assert finance staff can only create affiliations on their own org."""
+    claims = TestJwtClaims.sbc_finance_staff_role
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.post(
+        f"/api/v1/orgs/{org.id}/affiliations",
+        headers=headers,
+        data=json.dumps(TestAffliationInfo.affiliation3),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org.id, entity.id)
+    if expected_status == HTTPStatus.CREATED:
+        assert affiliation is not None
+    else:
+        assert affiliation is None

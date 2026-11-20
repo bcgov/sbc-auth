@@ -763,6 +763,17 @@ class Org:  # pylint: disable=too-many-public-methods
         return user_from_context.is_staff() or user_from_context.is_readonly_staff()
 
     @staticmethod
+    @user_context
+    def can_skip_membership_check(allowed_roles: tuple = None, **kwargs):
+        """Check if user is staff, external staff, or has a role in allowed_roles."""
+        user_from_context: UserContext = kwargs["user_context"]
+        return (
+            user_from_context.is_staff()
+            or user_from_context.has_role(Role.EXTERNAL_STAFF_READONLY.value)
+            or any(user_from_context.has_role(role) for role in (allowed_roles or ()))
+        )
+
+    @staticmethod
     def find_by_org_id(org_id, allowed_roles: tuple = None, allow_linking_key: bool = False, **kwargs):  # noqa: ARG004
         """Find and return an existing organization with the provided id.
 
@@ -776,7 +787,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if not org_model:
             return None
 
-        if not Org.is_staff_or_readonly_staff():
+        if not Org.can_skip_membership_check(allowed_roles):
             if not (allow_linking_key and linking_key_authorizes(org_id)):
                 check_auth(one_of_roles=allowed_roles, org_id=org_id)
 

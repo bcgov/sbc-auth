@@ -160,7 +160,7 @@ class TestJwtClaims(dict, Enum):
         "firstname": fake.first_name(),
         "lastname": fake.last_name(),
         "preferred_username": fake.user_name(),
-        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "external_staff_readonly"]},
+        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "external_staff_readonly", "public_user"]},
         "loginSource": LoginSource.STAFF.value,
     }
 
@@ -171,7 +171,7 @@ class TestJwtClaims(dict, Enum):
         "firstname": fake.first_name(),
         "lastname": fake.last_name(),
         "preferred_username": fake.user_name(),
-        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "sbc_finance_staff"]},
+        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "sbc_finance_staff", "public_user"]},
         "loginSource": LoginSource.STAFF.value,
     }
 

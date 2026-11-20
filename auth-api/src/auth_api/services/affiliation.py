@@ -52,7 +52,6 @@ from auth_api.utils.roles import (
     ALL_ALLOWED_ROLES,
     CLIENT_AUTH_ROLES,
     INVALID_ORG_CREATE_TYPE_CODES,
-    READONLY_STAFF_ROLES,
     STAFF,
     Role,
 )
@@ -438,7 +437,9 @@ class Affiliation:
         """Delete the affiliation for the provided org id and business id."""
         user_from_context: UserContext = kwargs["user_context"]
         current_app.logger.info(f"<delete_affiliation org_id:{da.org_id} business_identifier:{da.business_identifier}")
-        org = OrgService.find_by_org_id(da.org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, *READONLY_STAFF_ROLES))
+        org = OrgService.find_by_org_id(
+            da.org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF, Role.EXTERNAL_STAFF_READONLY.value)
+        )
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
