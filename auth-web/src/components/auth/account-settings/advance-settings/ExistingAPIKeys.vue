@@ -953,6 +953,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 }
 .masked-key {
   margin: -10px 0;
+  min-height: 44px;
 }
 
 .copy-key-btn.v-btn--icon {
