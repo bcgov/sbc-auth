@@ -3684,3 +3684,39 @@ def test_finance_staff_create_affiliation(
         assert affiliation is not None
     else:
         assert affiliation is None
+
+
+@pytest.mark.parametrize(
+    "is_member, expected_status",
+    [
+        (False, HTTPStatus.FORBIDDEN),
+        (True, HTTPStatus.OK),
+    ],
+)
+def test_finance_staff_update_mailing_address(client, jwt, session, keycloak_mock, is_member, expected_status):
+    """Assert finance staff can only update the mailing address on their own org."""
+    claims = TestJwtClaims.sbc_finance_staff_role
+    owner = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(user_id=owner.id)
+    factory_membership_model(owner.id, org.id)
+    staff_user = factory_user_model(
+        user_info={**TestUserInfo.user1, "keycloak_guid": claims["sub"], "idp_userid": claims["idp_userid"]}
+    )
+    if is_member:
+        factory_membership_model(staff_user.id, org.id)
+    mailing_address = TestOrgInfo.get_mailing_address()
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.put(
+        f"/api/v1/orgs/{org.id}/mailing-address",
+        headers=headers,
+        data=json.dumps({"mailingAddress": mailing_address}),
+        content_type="application/json",
+    )
+
+    assert rv.status_code == expected_status
+    contacts = OrgModel.find_by_org_id(org.id).contacts
+    if expected_status == HTTPStatus.OK:
+        assert contacts[0].contact.street == mailing_address["street"]
+    else:
+        assert not contacts

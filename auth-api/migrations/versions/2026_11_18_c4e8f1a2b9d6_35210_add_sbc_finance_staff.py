@@ -17,7 +17,6 @@ branch_labels = None
 depends_on = None
 
 PERMISSIONS = [
-    "change_org_name",
     "change_role",
     "manage_statements",
     "remove_business",

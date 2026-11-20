@@ -437,8 +437,8 @@ export default defineComponent({
       isAddressInfoIncomplete: computed(() => (
         currentOrgAddress.value ? Object.keys(currentOrgAddress.value).length === 0 : true
       )),
-      nameChangeNotAllowed: computed(() => (isGovmAccount.value)) &&
-      CommonUtils.isReadonlyStaff(userStore.currentUser.roles)
+      nameChangeNotAllowed: computed(() => isGovmAccount.value &&
+        CommonUtils.isReadonlyStaff(userStore.currentUser.roles))
     })
 
     const suspensionSelectRules = [
