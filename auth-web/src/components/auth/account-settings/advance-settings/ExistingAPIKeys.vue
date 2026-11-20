@@ -8,16 +8,9 @@
         >
           {{ apiKeysTitle }}
         </h2>
-        <p
-          class="mb-0 mt-1"
-          data-test="api-key-counts"
-        >
-          <strong>{{ namedKeyCount }}/{{ maxNamedKeys }}</strong> Named Keys |
-          <strong>{{ unnamedKeyCount }}</strong> Unnamed Keys
-        </p>
       </div>
       <v-btn
-        v-if="isCreateApiKeyEnabled"
+        v-if="isCreateKeyAllowed"
         large
         depressed
         class="px-6"
@@ -37,6 +30,33 @@
       </v-btn>
     </header>
 
+    <!-- Not eligible for API access alert -->
+    <v-alert
+      v-if="isApiEligibilityWarningDisplayed"
+      class="api-eligibility-alert mb-7"
+      icon="mdi-alert"
+      data-test="api-eligibility-warning"
+    >
+      <div>
+        To create API keys, please set up a payment method in
+        <router-link :to="{ name: Pages.PRODUCT_SETTINGS }">
+          Products and Payment.
+        </router-link>
+      </div>
+      <div>
+        <strong>Note</strong>: Paid services accessed with API keys require pre-authorized debit (PAD) as the
+        payment method.
+      </div>
+    </v-alert>
+
+    <p
+      v-if="isApiKeyListDisplayed && isCreateApiKeyEnabled"
+      class="mb-6 mt-1"
+      data-test="api-key-counts"
+    >
+      <strong>{{ namedKeyCount }}/{{ maxNamedKeys }}</strong> Named Keys |
+      <strong>{{ unnamedKeyCount }}</strong> Unnamed Keys
+    </p>
     <!-- Create key -->
     <div
       v-if="isCreateFormOpen"
@@ -130,6 +150,7 @@
       <v-data-table
         v-if="!isCreateApiKeyEnabled"
         class="apikey-list"
+        data-test="api-key-table"
         :headers="legacyActivityHeader"
         :items="apiKeyList"
         no-data-text="No API Keys"
@@ -168,8 +189,9 @@
 
       <!-- new table when EnableCreateApiKey feature flag is enabled -->
       <v-data-table
-        v-else
+        v-else-if="isApiKeyListDisplayed"
         class="apikey-list mb-10"
+        data-test="api-key-table"
         :headers="activityHeader"
         :items="apiKeyList"
         item-key="apiKey"
@@ -436,11 +458,12 @@
 import { Action, State } from 'pinia-class'
 import { ApiKey, OrgApiKeysResponse, Organization } from '@/models/Organization'
 import { Component, Mixins } from 'vue-property-decorator'
+import { LDFlags, Pages } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { ApiEligibility } from '@/models/ApiEligibility'
 import { ApiTermsStatus } from '@/models/ApiTermsStatus'
 import CommonUtils from '@/util/common-util'
 import CreateApiKeySuccessModal from '@/components/auth/account-settings/advance-settings/CreateApiKeySuccessModal.vue'
-import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { copyApiKeyToClipboard } from '@/util/api-key-util'
@@ -460,8 +483,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
   @Action(useOrgStore) readonly deleteOrgApiKey!: (apiDetails: any) => Promise<any>
   @Action(useOrgStore) readonly getApiTermsStatus!: (orgId: number) => Promise<ApiTermsStatus>
+  @Action(useOrgStore) readonly getApiEligibility!: (orgId: number) => Promise<ApiEligibility>
 
   public readonly PAGE_LIMIT = 5
+  public readonly Pages = Pages
+  public isApiEligible = false
+  public isEligibilityLoading = true
+  public isEligibilityCheckFailed = false
   // the limit comes from the API with the key list, it's null until the keys are loaded
   public maxNamedKeys: number = null
   public isLoading = true
@@ -482,6 +510,26 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   get isCreateApiKeyEnabled (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableCreateApiKey)
+  }
+
+  // eligibility is only checked when creating keys feature flag is enabled
+  get isEligibilityPending (): boolean {
+    return this.isCreateApiKeyEnabled && this.isEligibilityLoading
+  }
+
+  // warning is only shown when the check confirmed the account isn't eligible
+  get isApiEligibilityWarningDisplayed (): boolean {
+    return this.isCreateApiKeyEnabled && !this.isEligibilityPending && !this.isEligibilityCheckFailed &&
+      !this.isApiEligible
+  }
+
+  get isCreateKeyAllowed (): boolean {
+    return this.isCreateApiKeyEnabled && !this.isEligibilityPending && this.isApiEligible
+  }
+
+  // api key info is hidden until eligibility is checked
+  get isApiKeyListDisplayed (): boolean {
+    return !this.isEligibilityPending && !this.isApiEligibilityWarningDisplayed
   }
 
   // counts include revoked keys, as they are listed until deleted
@@ -599,21 +647,43 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     // keys are loaded first so we know the named key limit
     await this.initialize()
     // user is routed back with openCreateKey param after accepting the API terms of use
-    if (this.$route?.params?.openCreateKey === 'true' && this.isCreateApiKeyEnabled) {
+    if (this.$route?.params?.openCreateKey === 'true' && this.isCreateKeyAllowed) {
       await this.$nextTick()
       this.openCreateKeyForm()
     }
   }
 
   public async initialize () {
-    await this.loadApiKeys()
+    await Promise.all([this.loadApiKeys(), this.checkApiEligibility()])
+  }
+
+  public async checkApiEligibility () {
+    if (!this.isCreateApiKeyEnabled) {
+      return
+    }
+    this.isEligibilityLoading = true
+    this.isEligibilityCheckFailed = false
+    try {
+      const eligibility = await this.getApiEligibility(this.currentOrganization.id)
+      this.isApiEligible = eligibility?.isApiEligible === true
+    } catch (e) {
+      this.isApiEligible = false
+      this.isEligibilityCheckFailed = true
+      // eslint-disable-next-line no-console
+      console.error(e)
+    } finally {
+      this.isEligibilityLoading = false
+    }
   }
 
   public async loadApiKeys () {
     this.isLoading = true
     this.apiKeyList = []
     try {
-      const resp = await this.getOrgApiKeys(this.currentOrganization.id, true)
+      // legacy table (when feature flag off) should load only active keys
+      // new table (feature flag on) will load all api keys, active and revoked
+      const shouldShowAllKeys = this.isCreateApiKeyEnabled
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, shouldShowAllKeys)
       this.apiKeyList = resp?.consumer?.consumerKey || []
       this.maxNamedKeys = resp?.maxNamedKeys ?? null
       this.isLoading = false
@@ -709,6 +779,9 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
         return
       }
       this.closeCreateForm()
+      if (errorCode === 'API_ACCESS_NOT_ELIGIBLE') {
+        this.isApiEligible = false
+      }
       if (errorCode === 'API_KEY_NAMED_LIMIT_REACHED') {
         // eg: if a named key was created in another tab
         await this.loadApiKeys()
@@ -717,8 +790,9 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
           return
         }
       }
-      const message = this.getErrorMessage(e, ['API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED']) ||
-        'The API key could not be created at this time. Please try again.'
+      const message = this.getErrorMessage(e, [
+        'API_TERMS_NOT_FOUND', 'API_KEY_NAMED_LIMIT_REACHED', 'API_ACCESS_NOT_ELIGIBLE', 'SERVICE_UNAVAILABLE'
+      ]) || 'The API key could not be created at this time. Please try again.'
       this.openAlert('error', 'mdi-alert', 'Unable to Create API Key', '', message)
     } finally {
       this.isCreating = false
@@ -839,6 +913,17 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
+.v-alert.api-eligibility-alert {
+  border-radius: 4px;
+  border: 1px solid $BCgovGold5;
+  background: $BCgovGold0;
+  color: $gray7;
+
+  ::v-deep .v-icon {
+    color: $app-alert-orange;
+  }
+}
+
 .view-header {
   display: flex;
   flex-direction: row;
@@ -868,6 +953,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 }
 .masked-key {
   margin: -10px 0;
+  min-height: 44px;
 }
 
 .copy-key-btn.v-btn--icon {

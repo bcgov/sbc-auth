@@ -25,6 +25,7 @@ from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
+from flask import current_app
 from requests.exceptions import HTTPError
 from sqlalchemy import text
 
@@ -116,11 +117,6 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, mock_create_paymen
         return mock_response
 
     monkeypatch.setattr("auth_api.services.rest_service.RestService.post", mock_post)
-
-    def get_pay_account_mock(_org, _user):
-        return {"paymentMethod": "PAD"}
-
-    monkeypatch.setattr("auth_api.services.api_gateway.ApiGateway._get_pay_account", get_pay_account_mock)
 
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -685,3 +681,24 @@ def test_create_api_key_invalid_payload(client, jwt, session, keycloak_mock, moc
     assert rv.status_code == HTTPStatus.BAD_REQUEST
     # schema errors have no code, unlike the terms check which also returns 400
     assert "code" not in rv.json
+
+
+def _get_eligibility(client, org_id, headers):
+    return client.get(f"/api/v1/orgs/{org_id}/api-keys/eligibility", headers=headers, content_type="application/json")
+
+
+@pytest.mark.parametrize("env_name", ["prod", "sandbox"])
+def test_get_api_eligibility_eligible(
+    client, jwt, session, keycloak_mock, mock_create_payment_settings, monkeypatch, env_name
+):  # pylint:disable=unused-argument
+    """Assert that an active account is eligible for api service without calling pay-api."""
+    org_id, headers = _create_org_as_account_holder(client, jwt)
+    monkeypatch.setitem(current_app.config, "ENVIRONMENT_NAME", env_name)
+    pay_get = Mock()
+    monkeypatch.setattr("auth_api.services.pay.RestService.get", pay_get)
+
+    rv = _get_eligibility(client, org_id, headers)
+
+    assert rv.status_code == HTTPStatus.OK
+    assert rv.json == {"isApiEligible": True, "isAccountActive": True}
+    pay_get.assert_not_called()
