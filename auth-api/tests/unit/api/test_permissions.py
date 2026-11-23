@@ -67,9 +67,9 @@ def test_returns_empty_string_permissions(client, jwt, session):  # pylint:disab
     [
         (OrgType.MAXIMUS_STAFF.value, TestJwtClaims.external_staff_readonly_role, True),
         (OrgType.CC_STAFF.value, TestJwtClaims.external_staff_readonly_role, True),
-        (OrgType.SBC_FINANCE_STAFF.value, TestJwtClaims.sbc_finance_staff_role, True),
+        (OrgType.SBC_FIN_STAFF.value, TestJwtClaims.sbc_finance_staff_role, True),
         (OrgType.MAXIMUS_STAFF.value, TestJwtClaims.public_user_role, False),
-        (OrgType.SBC_FINANCE_STAFF.value, TestJwtClaims.public_user_role, False),
+        (OrgType.SBC_FIN_STAFF.value, TestJwtClaims.public_user_role, False),
     ],
 )
 def test_permissions_include_org_type_permissions(

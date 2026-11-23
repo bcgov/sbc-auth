@@ -965,7 +965,7 @@ def test_authorized_accounts_returns_is_business_account(client, jwt, session, s
         OrgType.SBC_STAFF.value,
         OrgType.MAXIMUS_STAFF.value,
         OrgType.CC_STAFF.value,
-        OrgType.SBC_FINANCE_STAFF.value,
+        OrgType.SBC_FIN_STAFF.value,
     ],
 )
 def test_authorized_accounts_excludes_staff_orgs(client, jwt, session, staff_org_type):  # pylint:disable=unused-argument

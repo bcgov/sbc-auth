@@ -81,7 +81,7 @@ INVALID_ORG_CREATE_TYPE_CODES = (
     OrgType.STAFF.value,
     OrgType.MAXIMUS_STAFF.value,
     OrgType.CC_STAFF.value,
-    OrgType.SBC_FINANCE_STAFF.value,
+    OrgType.SBC_FIN_STAFF.value,
 )
 
 READONLY_STAFF_ROLES = (Role.EXTERNAL_STAFF_READONLY.value, Role.SBC_FINANCE_STAFF.value)

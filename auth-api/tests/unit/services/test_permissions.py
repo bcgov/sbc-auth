@@ -55,7 +55,7 @@ def test_get_permissions_for_membership_cache_miss(session):  # pylint: disable=
 @pytest.mark.parametrize(
     "membership_type, claims, org_type",
     [
-        ("SBC_FIN_STAFF", TestJwtClaims.sbc_finance_staff_role, OrgType.SBC_FINANCE_STAFF.value),
+        ("SBC_FIN_STAFF", TestJwtClaims.sbc_finance_staff_role, OrgType.SBC_FIN_STAFF.value),
         ("EXTERNAL_STAFF", TestJwtClaims.external_staff_readonly_role, OrgType.MAXIMUS_STAFF.value),
     ],
 )

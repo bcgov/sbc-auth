@@ -97,7 +97,7 @@ class PaymentAccountStatus(Enum):
 
 
 class OrgType(Enum):
-    """Org types."""
+    """Org types. Member names must match their values (looked up by name via OrgType[type_code])."""
 
     PUBLIC = "PUBLIC"
     PREMIUM = "PREMIUM"
@@ -106,7 +106,7 @@ class OrgType(Enum):
     SBC_STAFF = "SBC_STAFF"
     MAXIMUS_STAFF = "MAXIMUS_STAFF"
     CC_STAFF = "CC_STAFF"
-    SBC_FINANCE_STAFF = "SBC_FIN_STAFF"
+    SBC_FIN_STAFF = "SBC_FIN_STAFF"
 
 
 class DocumentType(Enum):
