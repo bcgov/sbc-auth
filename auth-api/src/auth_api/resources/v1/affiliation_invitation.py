@@ -107,6 +107,8 @@ def post_unaffiliated_invitation(business_identifier):
         request_json = request.get_json(silent=True) or {}
         is_reminder = request_json.get("isReminder", False)
         send_email = request_json.get("sendEmail", True)
+        # login page preset for the returned link; null = default login page (all identity providers)
+        preset = request_json.get("preset", "bcscUser")
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if not entity:
             return {"message": "Business not found."}, HTTPStatus.NOT_FOUND
@@ -114,7 +116,7 @@ def post_unaffiliated_invitation(business_identifier):
             entity, is_reminder=is_reminder, send_email=send_email
         ).as_dict()
         return {
-            "contextUrl": AffiliationInvitationService.build_unaffiliated_context_url(invitation["token"]),
+            "contextUrl": AffiliationInvitationService.build_unaffiliated_context_url(invitation["token"], preset),
             "expiresOn": invitation.get("expires_on"),
             "recipientEmail": invitation["recipient_email"],
         }, HTTPStatus.CREATED

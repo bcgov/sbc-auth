@@ -1111,10 +1111,11 @@ def test_get_all_invitations_with_details_related_to_org(
         ("update", LoginSource.BCSC.value, Error.INVALID_AFFILIATION_INVITATION_TYPE),
         # UNAFFILIATED_EMAIL delete is allowed
         ("delete", LoginSource.BCSC.value, None),
-        # UNAFFILIATED_EMAIL accept checks login_source
+        # UNAFFILIATED_EMAIL accept: any login page option (BCSC, BCeID, IDIR); API logins rejected
         ("accept", LoginSource.BCSC.value, None),
-        ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
-        ("accept", LoginSource.STAFF.value, Error.INVALID_USER_CREDENTIALS),
+        ("accept", LoginSource.BCEID.value, None),
+        ("accept", LoginSource.STAFF.value, None),
+        ("accept", LoginSource.API_GW.value, Error.INVALID_USER_CREDENTIALS),
     ],
 )
 def test_unaffiliated_email_invitation_auth(
@@ -1239,6 +1240,28 @@ def test_send_unaffiliated_email_invitation_send_email_false(
     assert (
         AffiliationInvitationService.build_unaffiliated_context_url(token)
         == f"https://localhost.com?preset=bcscUser&token={token}"
+    )
+
+
+@pytest.mark.parametrize(
+    "preset, expected",
+    [
+        ("bcscUser", "https://localhost.com?preset=bcscUser&token=abc"),
+        (None, "https://localhost.com?token=abc"),
+        ("", "https://localhost.com?token=abc"),
+    ],
+    ids=["bcscUser", "none", "empty"],
+)
+def test_build_unaffiliated_context_url(app, preset, expected):
+    """Verify the SAF link only carries a login preset when one is given."""
+    assert AffiliationInvitationService.build_unaffiliated_context_url("abc", preset) == expected
+
+
+def test_build_unaffiliated_context_url_default_preset(app):
+    """Verify the SAF link defaults to the BCSC-only login preset (migration emails unchanged)."""
+    assert (
+        AffiliationInvitationService.build_unaffiliated_context_url("abc")
+        == "https://localhost.com?preset=bcscUser&token=abc"
     )
 
 

@@ -1174,6 +1174,36 @@ def test_send_unaffiliated_email_invitation_returns_context_url(
     assert body["recipientEmail"] == TestContactInfo.contact1["email"]
 
 
+@pytest.mark.parametrize(
+    "body, expected_query",
+    [
+        ({}, "?preset=bcscUser&token="),
+        ({"preset": "bcscUser"}, "?preset=bcscUser&token="),
+        ({"preset": None}, "?token="),
+    ],
+    ids=["default-bcscUser", "explicit-bcscUser", "no-preset"],
+)
+def test_send_unaffiliated_email_invitation_context_url_preset(
+    client, jwt, session, keycloak_mock, business_mock, mock_service_account_token, body, expected_query
+):
+    """Assert the preset in the request body controls the login page preset on the returned SAF link."""
+    business_identifier = setup_entity_with_contact(client, jwt)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    rv = client.post(
+        f"/api/v1/affiliationInvitations/unaffiliated/{business_identifier}",
+        data=json.dumps({"sendEmail": False, **body}),
+        headers=headers,
+        content_type="application/json",
+    )
+    assert rv.status_code == HTTPStatus.CREATED
+
+    entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
+    invitation = AffiliationInvitationModel.find_invitations_by_entity(entity.identifier)[0]
+    registry_home_url = client.application.config["REGISTRY_HOME_URL"]
+    assert json.loads(rv.data)["contextUrl"] == f"{registry_home_url}{expected_query}{invitation.token}"
+
+
 def test_send_unaffiliated_email_invitation_send_email_false_skips_mailer(client, jwt, session, keycloak_mock):
     """Assert sendEmail=false creates the tokenized invitation without mailing or looking up the business."""
     business_identifier = setup_entity_with_contact(client, jwt)
