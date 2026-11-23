@@ -20,7 +20,7 @@ from flask import abort, g, request
 
 # from auth_api.models import User as UserModel
 from auth_api.utils.enums import LoginSource
-from auth_api.utils.roles import Role
+from auth_api.utils.roles import READONLY_STAFF_ROLES, Role
 
 
 def _get_context():
@@ -84,9 +84,9 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         """Return True if the user is staff user."""
         return self._roles and any(role in [Role.STAFF.value] for role in self._roles)
 
-    def is_external_staff(self) -> bool:
-        """Return True if the user is external staff."""
-        return self._roles and any(role in [Role.EXTERNAL_STAFF_READONLY.value] for role in self._roles)
+    def is_readonly_staff(self) -> bool:
+        """Return True if the user is read-only staff."""
+        return self._roles and any(role in READONLY_STAFF_ROLES for role in self._roles)
 
     def is_staff_admin(self) -> bool:
         """Return True if the user is staff user."""

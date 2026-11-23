@@ -1,7 +1,7 @@
 import 'moment-timezone'
 import { Address, BaseAddressModel } from '@/models/address'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { NrRequestTypeStrings } from '@/util/constants'
+import { NrRequestTypeStrings, ReadonlyStaffRoles } from '@/util/constants'
 import moment from 'moment'
 
 type DateLike = string | Date | moment.Moment
@@ -27,6 +27,10 @@ export default class CommonUtils {
     } else {
       return `${dateObj1.format('MMMM DD, YYYY')} - ${dateObj2.format('MMMM DD, YYYY')}`
     }
+  }
+
+  static isReadonlyStaff (roles: string[] = []): boolean {
+    return ReadonlyStaffRoles.some(role => roles?.includes(role))
   }
 
   // checking url matches the regex

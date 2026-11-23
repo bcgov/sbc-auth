@@ -194,10 +194,12 @@ def test_delete(session):  # pylint:disable=unused-argument
     assert org.status_code == OrgStatusEnum.INACTIVE.value
 
 
-def test_invalid_org_create_type_code(session):
+@pytest.mark.parametrize(
+    "invalid_type_code",
+    [OrgTypeEnum.MAXIMUS_STAFF.value, OrgTypeEnum.CC_STAFF.value, OrgTypeEnum.SBC_FINANCE_STAFF.value],
+)
+def test_invalid_org_create_type_code(session, invalid_type_code):
     """Test that creating an Org with an invalid type code is rejected."""
-    invalid_type_code = OrgTypeEnum.CC_STAFF.value
-
     org_info = {"name": "Invalid Org", "type_code": invalid_type_code}
 
     with pytest.raises(BusinessException) as excinfo:

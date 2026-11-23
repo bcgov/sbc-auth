@@ -48,7 +48,7 @@ class Authorization:
         auth = None
         token_roles = user_from_context.roles
 
-        if any(role in [Role.STAFF.value, Role.EXTERNAL_STAFF_READONLY.value] for role in token_roles):
+        if user_from_context.is_staff() or user_from_context.is_readonly_staff():
             if expanded:
                 # Query Authorization view by business identifier
                 auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id)
@@ -214,12 +214,12 @@ class Authorization:
 
 
 @user_context
-def is_competent_authority_or_external_staff(**kwargs) -> bool:
+def is_competent_authority_or_readonly_staff(**kwargs) -> bool:
     """Check if the account has a competent authority ('CA_SEARCH') product subscription."""
     user_from_context: UserContext = kwargs["user_context"]
     account_id = user_from_context.account_id
 
-    if user_from_context.is_external_staff():
+    if user_from_context.is_readonly_staff():
         return True
     if account_id is None:
         return False

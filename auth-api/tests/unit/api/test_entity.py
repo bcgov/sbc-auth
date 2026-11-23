@@ -144,7 +144,7 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
         assert rv.status_code == 400
 
 
-@mock.patch("auth_api.resources.v1.entity.is_competent_authority_or_external_staff")
+@mock.patch("auth_api.resources.v1.entity.is_competent_authority_or_readonly_staff")
 def test_get_entity(mock_function, client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
     headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
@@ -212,7 +212,7 @@ def test_get_entity_as_competent_authority(mock_auth_view, check_auth, client, j
         headers=headers,
         content_type="application/json",
     )
-    # this verifies that `is_competent_authority_or_external_staff()`
+    # this verifies that `is_competent_authority_or_readonly_staff()`
     # was called and it fetched account id from context, then called
     # `get_all_product_subscription` with correct values
     mock_auth_view.find_account_authorization_by_org_id_and_product.assert_called_once_with(
@@ -965,6 +965,7 @@ def test_authorized_accounts_returns_is_business_account(client, jwt, session, s
         OrgType.SBC_STAFF.value,
         OrgType.MAXIMUS_STAFF.value,
         OrgType.CC_STAFF.value,
+        OrgType.SBC_FINANCE_STAFF.value,
     ],
 )
 def test_authorized_accounts_excludes_staff_orgs(client, jwt, session, staff_org_type):  # pylint:disable=unused-argument

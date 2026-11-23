@@ -4,7 +4,7 @@
   >
     <!-- Staff - Breadcrumbs / Back Navigation -->
     <nav
-      v-if="isStaff || isExternalStaff"
+      v-if="isStaff || isReadOnlyStaff"
       class="crumbs py-6"
       aria-label="breadcrumb"
     >
@@ -24,7 +24,7 @@
 
     <!-- Back Button -->
     <nav
-      v-if="!isStaff && !isExternalStaff"
+      v-if="!isStaff && !isReadOnlyStaff"
       class="crumbs py-6"
       aria-label="breadcrumb"
     >
@@ -338,6 +338,7 @@ import { mapActions, mapState } from 'pinia'
 import AccountInactiveAlert from '@/components/auth/common/AccountInactiveAlert.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { canViewVendorConnections } from '@/util/vendor-connection-util'
@@ -377,7 +378,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private readonly permissions!: string[]
 
   private handleBackButton (): void {
-    this.isStaff || this.isExternalStaff
+    this.isStaff || this.isReadOnlyStaff
       ? this.$router.push(Pages.STAFF_DASHBOARD)
       : window.location.assign(ConfigHelper.getBcrosDashboardURL(this.orgId))
   }
@@ -386,8 +387,8 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return this.currentUser.roles.includes(Role.Staff)
   }
 
-  private get isExternalStaff ():boolean {
-    return this.currentUser.roles.includes(Role.ExternalStaffReadonly)
+  private get isReadOnlyStaff ():boolean {
+    return CommonUtils.isReadonlyStaff(this.currentUser.roles)
   }
 
   private get accountInfoUrl (): string {
@@ -447,7 +448,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
-    return (this.isStaff || this.isExternalStaff) && (
+    return (this.isStaff || this.isReadOnlyStaff) && (
       this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ||
       this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
     )
@@ -455,7 +456,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   // show baner for staff user and account inactive
   private get showInactiveFreezeBanner () {
-    return (this.isStaff || this.isExternalStaff) && (
+    return (this.isStaff || this.isReadOnlyStaff) && (
       this.currentOrganization?.statusCode === AccountStatus.INACTIVE
     )
   }

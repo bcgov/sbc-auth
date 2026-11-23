@@ -61,6 +61,7 @@
 <script lang="ts">
 import { ComputedRef, computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { Pages, Permission, Role } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
 import { storeToRefs } from 'pinia'
 import { useCodesStore } from '@/stores/codes'
@@ -150,11 +151,11 @@ export default defineComponent({
     const state = reactive({
       tab: 0,
       canManageAccounts: computed(() => currentUser?.roles?.includes(Role.StaffManageAccounts) ||
-      currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
+      CommonUtils.isReadonlyStaff(currentUser?.roles)),
       canViewInvitations: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) ||
-        currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
+        CommonUtils.isReadonlyStaff(currentUser?.roles)),
       canCreateAccounts: computed(() => currentUser?.roles?.includes(Role.StaffCreateAccounts) &&
-      !currentUser?.roles?.includes(Role.ExternalStaffReadonly)),
+      !CommonUtils.isReadonlyStaff(currentUser?.roles)),
       canViewAccounts: computed(() => currentUser?.roles?.includes(Role.StaffViewAccounts)),
       canSuspendAccounts: computed(() => currentUser?.roles?.includes(Role.StaffSuspendAccounts) ||
         currentUser?.roles?.includes(Role.StaffViewAccounts)),

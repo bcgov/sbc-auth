@@ -431,6 +431,14 @@
       "subGroups": []
     },
     {
+      "name": "sbc_finance_staff",
+      "path": "/sbc_finance_staff",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
       "name": "contact_centre_staff",
       "path": "/contact_centre_staff",
       "attributes": {},

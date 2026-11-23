@@ -153,6 +153,39 @@ class TestJwtClaims(dict, Enum):
         "loginSource": LoginSource.STAFF.value,
     }
 
+    external_staff_readonly_role = {
+        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
+        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "firstname": fake.first_name(),
+        "lastname": fake.last_name(),
+        "preferred_username": fake.user_name(),
+        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "external_staff_readonly", "public_user"]},
+        "loginSource": LoginSource.STAFF.value,
+    }
+
+    sbc_finance_staff_role = {
+        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
+        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "firstname": fake.first_name(),
+        "lastname": fake.last_name(),
+        "preferred_username": fake.user_name(),
+        "realm_access": {"roles": ["view_accounts", "view_activity_logs", "sbc_finance_staff", "public_user"]},
+        "loginSource": LoginSource.STAFF.value,
+    }
+
+    view_accounts_without_readonly_staff_role = {
+        "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
+        "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "idp_userid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+        "firstname": fake.first_name(),
+        "lastname": fake.last_name(),
+        "preferred_username": fake.user_name(),
+        "realm_access": {"roles": ["view_accounts", "view_activity_logs"]},
+        "loginSource": LoginSource.STAFF.value,
+    }
+
     staff_manage_business = {
         "iss": CONFIG.JWT_OIDC_TEST_ISSUER,
         "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",

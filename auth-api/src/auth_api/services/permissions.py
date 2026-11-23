@@ -76,13 +76,13 @@ class Permissions:  # pylint: disable=too-few-public-methods
         if include_all_permissions:
             additional_permissions = Permissions.get_additional_user_permissions(user_model)
         if actions_from_cache:
-            actions = actions_from_cache + additional_permissions
+            actions = actions_from_cache
         else:
             permissions = PermissionsModel.get_permissions_by_membership(org_status, membership_type)
             actions = []
             for permission in permissions:
                 actions.append(permission.actions)
-        return actions + additional_permissions
+        return list(dict.fromkeys(actions + additional_permissions))
 
     @staticmethod
     @user_context
@@ -90,7 +90,7 @@ class Permissions:  # pylint: disable=too-few-public-methods
         """Check for and append additional permissions based on user type."""
         user_from_context: UserContext = kwargs["user_context"]
         additional_permissions = []
-        if user_from_context.is_staff() or user_from_context.is_external_staff():
+        if user_from_context.is_staff() or user_from_context.is_readonly_staff():
             additional_permissions = Permissions.get_permissions_by_org_type_membership(user_model.identifier)
 
         return additional_permissions

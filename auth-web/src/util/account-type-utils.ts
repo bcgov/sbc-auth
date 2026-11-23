@@ -33,6 +33,10 @@ export const ACCOUNT_TYPE_MAP: EnumDictionary<OrgAccountTypes, OrgMap> = {
   [OrgAccountTypes.MAXIMUS_STAFF]: {
     accessType: [AccessType.GOVM],
     orgType: Account.MAXIMUS_STAFF
+  },
+  [OrgAccountTypes.SBC_FINANCE_STAFF]: {
+    accessType: [AccessType.GOVM],
+    orgType: Account.SBC_FINANCE_STAFF
   }
 }
 

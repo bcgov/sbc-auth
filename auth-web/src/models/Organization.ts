@@ -152,7 +152,8 @@ export enum MembershipType {
   'Coordinator' = 'COORDINATOR',
   'User' = 'USER',
   'Staff' = 'STAFF',
-  'ExternalStaff' = 'EXTERNAL_STAFF'
+  'ExternalStaff' = 'EXTERNAL_STAFF',
+  'SbcFinanceStaff' = 'SBC_FIN_STAFF'
 }
 
 export interface Permissions {
@@ -353,7 +354,8 @@ export enum OrgAccountTypes {
   DIRECTOR_SEARCH = 'Director Search',
   STAFF = 'BC Registries Staff',
   SBC_STAFF = 'Service BC Staff',
-  MAXIMUS_STAFF = 'Maximus Staff'
+  MAXIMUS_STAFF = 'Maximus Staff',
+  SBC_FINANCE_STAFF = 'SBC Finance Staff'
 }
 
 export type ApiKeyEnvironment = 'prod' | 'sandbox'

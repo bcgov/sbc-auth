@@ -35,7 +35,12 @@ from auth_api.models.dataclass import Activity
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.auth_event_publisher import publish_team_member_event
-from auth_api.utils.constants import GROUP_CONTACT_CENTRE_STAFF, GROUP_MAXIMUS_STAFF, GROUP_SBC_STAFF
+from auth_api.utils.constants import (
+    GROUP_CONTACT_CENTRE_STAFF,
+    GROUP_MAXIMUS_STAFF,
+    GROUP_SBC_FINANCE_STAFF,
+    GROUP_SBC_STAFF,
+)
 from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, OrgStatus, OrgType, Status
 from auth_api.utils.roles import ADMIN, ALLOWED_READ_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -54,6 +59,7 @@ org_type_to_group_mapping = {
     OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
     OrgType.CC_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
     OrgType.SBC_STAFF.value: GROUP_SBC_STAFF,
+    OrgType.SBC_FINANCE_STAFF.value: GROUP_SBC_FINANCE_STAFF,
 }
 
 
@@ -119,8 +125,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         user_from_context: UserContext = kwargs["user_context"]
         status = Status.ACTIVE.value if status is None else Status[status].value
         membership_roles = ALLOWED_READ_ROLES if membership_roles is None else membership_roles
-        # If staff or external staff viewer return full list
-        if user_from_context.is_staff() or user_from_context.is_external_staff():
+        # If staff or read-only staff viewer return full list
+        if user_from_context.is_staff() or user_from_context.is_readonly_staff():
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
         current_user: UserService = UserService.find_by_jwt_token()

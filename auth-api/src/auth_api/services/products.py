@@ -508,7 +508,7 @@ class Product:
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
-        if not skip_auth and not user_from_context.is_external_staff():
+        if not skip_auth and not user_from_context.is_readonly_staff():
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: list[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
@@ -520,7 +520,7 @@ class Product:
         # Include hidden products only for staff and SBC staff
         include_hidden = (
             user_from_context.is_staff()
-            or user_from_context.is_external_staff()
+            or user_from_context.is_readonly_staff()
             or org.type_code == OrgType.SBC_STAFF.value
             or kwargs.get("include_hidden", False)
         )
