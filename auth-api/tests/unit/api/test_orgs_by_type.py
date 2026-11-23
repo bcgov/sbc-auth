@@ -100,7 +100,7 @@ def assert_invite(client, org_id, headers_inviter, headers_invitee, kc_invitee, 
         (GROUP_MAXIMUS_STAFF, OrgType.MAXIMUS_STAFF.value),
         (GROUP_CONTACT_CENTRE_STAFF, OrgType.CC_STAFF.value),
         (GROUP_SBC_STAFF, OrgType.SBC_STAFF.value),
-        (GROUP_SBC_FINANCE_STAFF, OrgType.SBC_FINANCE_STAFF.value),
+        (GROUP_SBC_FINANCE_STAFF, OrgType.SBC_FIN_STAFF.value),
     ],
 )
 def test_keycloak_groups_by_org_type(security_group, org_type, client, jwt, session, disable_org_update_listener):

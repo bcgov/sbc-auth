@@ -59,7 +59,7 @@ org_type_to_group_mapping = {
     OrgType.MAXIMUS_STAFF.value: GROUP_MAXIMUS_STAFF,
     OrgType.CC_STAFF.value: GROUP_CONTACT_CENTRE_STAFF,
     OrgType.SBC_STAFF.value: GROUP_SBC_STAFF,
-    OrgType.SBC_FINANCE_STAFF.value: GROUP_SBC_FINANCE_STAFF,
+    OrgType.SBC_FIN_STAFF.value: GROUP_SBC_FINANCE_STAFF,
 }
 
 

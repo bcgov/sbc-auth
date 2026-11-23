@@ -196,7 +196,7 @@ def test_delete(session):  # pylint:disable=unused-argument
 
 @pytest.mark.parametrize(
     "invalid_type_code",
-    [OrgTypeEnum.MAXIMUS_STAFF.value, OrgTypeEnum.CC_STAFF.value, OrgTypeEnum.SBC_FINANCE_STAFF.value],
+    [OrgTypeEnum.MAXIMUS_STAFF.value, OrgTypeEnum.CC_STAFF.value, OrgTypeEnum.SBC_FIN_STAFF.value],
 )
 def test_invalid_org_create_type_code(session, invalid_type_code):
     """Test that creating an Org with an invalid type code is rejected."""
