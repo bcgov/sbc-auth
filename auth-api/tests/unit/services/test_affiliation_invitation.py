@@ -1111,10 +1111,11 @@ def test_get_all_invitations_with_details_related_to_org(
         ("update", LoginSource.BCSC.value, Error.INVALID_AFFILIATION_INVITATION_TYPE),
         # UNAFFILIATED_EMAIL delete is allowed
         ("delete", LoginSource.BCSC.value, None),
-        # UNAFFILIATED_EMAIL accept checks login_source
+        # UNAFFILIATED_EMAIL accept: business users (BCSC, BCeID) only
         ("accept", LoginSource.BCSC.value, None),
-        ("accept", LoginSource.BCEID.value, Error.INVALID_USER_CREDENTIALS),
+        ("accept", LoginSource.BCEID.value, None),
         ("accept", LoginSource.STAFF.value, Error.INVALID_USER_CREDENTIALS),
+        ("accept", LoginSource.API_GW.value, Error.INVALID_USER_CREDENTIALS),
     ],
 )
 def test_unaffiliated_email_invitation_auth(

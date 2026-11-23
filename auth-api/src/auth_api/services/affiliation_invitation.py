@@ -76,6 +76,9 @@ class AffiliationInvitation:
     the Affiliation Invitation model.
     """
 
+    # login sources allowed to accept an UNAFFILIATED_EMAIL (SAF) invitation token: business users only
+    UNAFFILIATED_ACCEPT_LOGIN_SOURCES = (LoginSource.BCSC.value, LoginSource.BCEID.value)
+
     def __init__(self, model):
         """Return an affiliation invitation service instance."""
         self._model = model
@@ -202,8 +205,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
 
         if affiliation_invitation.type == AffiliationInvitationType.UNAFFILIATED_EMAIL.value:
-            # Ideally we're just looking for BCSC for now.
-            if user_from_context.login_source != affiliation_invitation.login_source:
+            # Business users only (BCSC or BCeID); the link offers both logins. Staff/API users are rejected.
+            if user_from_context.login_source not in AffiliationInvitation.UNAFFILIATED_ACCEPT_LOGIN_SOURCES:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
             check_auth(org_id=user_from_context.account_id, one_of_roles=(ADMIN, COORDINATOR, USER))
             org_id = user_from_context.account_id
@@ -961,7 +964,7 @@ class AffiliationInvitation:
             business_identifier=entity.business_identifier,
         )
         affiliation_invitation.token = confirmation_token
-        # This is required for now, because unsure how to handle BCEID users who are unvalidated.
+        # Informational only; acceptance checks UNAFFILIATED_ACCEPT_LOGIN_SOURCES, not this value.
         affiliation_invitation.login_source = LoginSource.BCSC.value
         affiliation_invitation.save()
 
