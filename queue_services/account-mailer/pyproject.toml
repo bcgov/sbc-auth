@@ -1,6 +1,6 @@
 [project]
 name = "account-mailer"
-version = "0.2.0"
+version = "3.1.0"
 description = ""
 authors = [{ name = "SBC Connect Team & Pay Team & SRE Team" }]
 readme = "README.md"
