@@ -974,10 +974,15 @@ class AffiliationInvitation:
         return AffiliationInvitation(affiliation_invitation)
 
     @staticmethod
-    def build_unaffiliated_context_url(token: str) -> str:
-        """Return the registry-home SAF entry link carrying the invitation token."""
+    def build_unaffiliated_context_url(token: str, preset: str | None = "bcscUser") -> str:
+        """Return the registry-home SAF entry link carrying the invitation token.
+
+        preset selects the registry-home login page variant (bcscUser = BC Services Card only).
+        None/empty omits it so the default login page (all identity providers) is shown.
+        """
         registry_home_url = current_app.config.get("REGISTRY_HOME_URL")
-        return f"{registry_home_url}?preset=bcscUser&token={token}"
+        preset_param = f"preset={preset}&" if preset else ""
+        return f"{registry_home_url}?{preset_param}token={token}"
 
     @staticmethod
     def _publish_unaffiliated_email(

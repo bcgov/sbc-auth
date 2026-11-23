@@ -1242,6 +1242,28 @@ def test_send_unaffiliated_email_invitation_send_email_false(
     )
 
 
+@pytest.mark.parametrize(
+    "preset, expected",
+    [
+        ("bcscUser", "https://localhost.com?preset=bcscUser&token=abc"),
+        (None, "https://localhost.com?token=abc"),
+        ("", "https://localhost.com?token=abc"),
+    ],
+    ids=["bcscUser", "none", "empty"],
+)
+def test_build_unaffiliated_context_url(app, preset, expected):
+    """Verify the SAF link only carries a login preset when one is given."""
+    assert AffiliationInvitationService.build_unaffiliated_context_url("abc", preset) == expected
+
+
+def test_build_unaffiliated_context_url_default_preset(app):
+    """Verify the SAF link defaults to the BCSC-only login preset (migration emails unchanged)."""
+    assert (
+        AffiliationInvitationService.build_unaffiliated_context_url("abc")
+        == "https://localhost.com?preset=bcscUser&token=abc"
+    )
+
+
 def test_validate_and_get_org_id():
     """Test _validate_and_get_org_id calls check_auth for UNAFFILIATED_EMAIL."""
     inv = mock.MagicMock(
