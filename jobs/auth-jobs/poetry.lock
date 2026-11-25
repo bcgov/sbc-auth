@@ -332,7 +332,8 @@ pytz = "^2026.3"
 requests = "^2.33.0"
 sbc-common-components = {git = "https://github.com/bcgov/sbc-common-components.git", branch = "master", subdirectory = "python"}
 sql-versioning = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "add_column_exclusion", subdirectory = "python/sql-versioning"}
-sqlalchemy-utils = "^0.41.2"
+sqlalchemy = "~2.0.28"
+sqlalchemy-utils = "^0.43.0"
 structured-logging = {git = "https://github.com/bcgov/sbc-connect-common.git", branch = "main", subdirectory = "python/structured-logging"}
 Werkzeug = "^3.1.9"
 
@@ -340,7 +341,7 @@ Werkzeug = "^3.1.9"
 type = "git"
 url = "https://github.com/sumesh85/sbc-auth.git"
 reference = "dependabot-fixes"
-resolved_reference = "d4b0c8f3c577b79ef3ec8513cde03cd06090997a"
+resolved_reference = "89f9e76c3f9bd2324473fc35f2aa3fbadd118027"
 subdirectory = "auth-api"
 
 [[package]]
@@ -3475,18 +3476,18 @@ sqlcipher = ["sqlcipher3_binary"]
 
 [[package]]
 name = "sqlalchemy-utils"
-version = "0.41.2"
+version = "0.43.0"
 description = "Various utility functions for SQLAlchemy."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "SQLAlchemy-Utils-0.41.2.tar.gz", hash = "sha256:bc599c8c3b3319e53ce6c5c3c471120bd325d0071fb6f38a10e924e3d07b9990"},
-    {file = "SQLAlchemy_Utils-0.41.2-py3-none-any.whl", hash = "sha256:85cf3842da2bf060760f955f8467b87983fb2e30f1764fd0e24a48307dc8ec6e"},
+    {file = "sqlalchemy_utils-0.43.0-py3-none-any.whl", hash = "sha256:b1a4739bea23a02a4cb7da9437d3e79645bac66cddec07051597149357191c09"},
+    {file = "sqlalchemy_utils-0.43.0.tar.gz", hash = "sha256:7e8741dbc2c0f992d2181cd69de13de292b3a2a5305a9da832e10d540abcedbf"},
 ]
 
 [package.dependencies]
-SQLAlchemy = ">=1.3"
+SQLAlchemy = ">=2.0"
 
 [package.extras]
 arrow = ["arrow (>=0.3.4)"]
@@ -3497,8 +3498,8 @@ intervals = ["intervals (>=0.7.1)"]
 password = ["passlib (>=1.6,<2.0)"]
 pendulum = ["pendulum (>=2.0.5)"]
 phone = ["phonenumbers (>=5.9.2)"]
-test = ["Jinja2 (>=2.3)", "Pygments (>=1.2)", "backports.zoneinfo ; python_version < \"3.9\"", "docutils (>=0.10)", "flake8 (>=2.4.0)", "flexmock (>=0.9.7)", "isort (>=4.2.2)", "pg8000 (>=1.12.4)", "psycopg (>=3.1.8)", "psycopg2 (>=2.5.1)", "psycopg2cffi (>=2.8.1)", "pymysql", "pyodbc", "pytest (==7.4.4)", "python-dateutil (>=2.6)", "pytz (>=2014.2)"]
-test-all = ["Babel (>=1.3)", "Jinja2 (>=2.3)", "Pygments (>=1.2)", "arrow (>=0.3.4)", "backports.zoneinfo ; python_version < \"3.9\"", "colour (>=0.0.4)", "cryptography (>=0.6)", "docutils (>=0.10)", "flake8 (>=2.4.0)", "flexmock (>=0.9.7)", "furl (>=0.4.1)", "intervals (>=0.7.1)", "isort (>=4.2.2)", "passlib (>=1.6,<2.0)", "pendulum (>=2.0.5)", "pg8000 (>=1.12.4)", "phonenumbers (>=5.9.2)", "psycopg (>=3.1.8)", "psycopg2 (>=2.5.1)", "psycopg2cffi (>=2.8.1)", "pymysql", "pyodbc", "pytest (==7.4.4)", "python-dateutil", "python-dateutil (>=2.6)", "pytz (>=2014.2)"]
+test = ["Jinja2 (>=2.3)", "Pygments (>=1.2)", "docutils (>=0.10)", "flexmock (>=0.9.7)", "pg8000 (>=1.12.4)", "psycopg (>=3.1.8)", "psycopg2 (>=2.5.1)", "psycopg2cffi (>=2.8.1)", "pymysql", "pyodbc", "pytest (>=9.0,<10)", "python-dateutil (>=2.6)", "pytz (>=2014.2)"]
+test-all = ["Babel (>=1.3)", "Jinja2 (>=2.3)", "Pygments (>=1.2)", "arrow (>=0.3.4)", "colour (>=0.0.4)", "cryptography (>=0.6)", "docutils (>=0.10)", "flexmock (>=0.9.7)", "furl (>=0.4.1)", "intervals (>=0.7.1)", "passlib (>=1.6,<2.0)", "pendulum (>=2.0.5)", "pg8000 (>=1.12.4)", "phonenumbers (>=5.9.2)", "psycopg (>=3.1.8)", "psycopg2 (>=2.5.1)", "psycopg2cffi (>=2.8.1)", "pymysql", "pyodbc", "pytest (>=9.0,<10)", "python-dateutil", "python-dateutil (>=2.6)", "pytz (>=2014.2)"]
 timezone = ["python-dateutil"]
 url = ["furl (>=0.4.1)"]
 
@@ -3994,4 +3995,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "7fe439f22bd78f857754e987898d4e80fe40409e3b77d36341e620741f5ae351"
+content-hash = "57f184c78b22dfdaf19b43a3b131f622de9ceb2b0b09fc34ba5a930880c037f6"
