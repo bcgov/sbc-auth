@@ -422,16 +422,19 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     }
 
     it.each([
-      ['not eligible', () => Promise.resolve({ isApiEligible: false }), true, true, false, false],
-      ['eligible', () => Promise.resolve({ isApiEligible: true }), true, false, true, true],
-      ['check failed', () => Promise.reject(new Error('eligibility failed')), true, false, false, true],
-      ['creating keys disabled', () => Promise.resolve({ isApiEligible: false }), false, false, false, true]
-    ])('Should show the right warning, Create Key and key list when %s',
-      async (_, eligibility, isCreateEnabled, warning, createButton, keyList) => {
+      ['not eligible', () => Promise.resolve({ isApiEligible: false }), true, true, false, false, false],
+      ['eligible', () => Promise.resolve({ isApiEligible: true }), true, false, false, true, true],
+      ['check failed', () => Promise.reject(new Error('eligibility failed')), true, false, true, false, true],
+      ['creating keys disabled', () => Promise.resolve({ isApiEligible: false }), false, false, false, false, true],
+      ['creating keys disabled and check fails', () => Promise.reject(new Error('eligibility failed')), false, false,
+        false, false, true]
+    ])('Should show the right warning, error, Create Key and key list when %s',
+      async (_, eligibility, isCreateEnabled, warning, error, createButton, keyList) => {
         await mountWithEligibility(eligibility, isCreateEnabled)
 
         expect(getApiEligibility.mock.calls).toEqual(isCreateEnabled ? [[123]] : [])
         expect(isDisplayed('api-eligibility-warning')).toBe(warning)
+        expect(isDisplayed('api-eligibility-error')).toBe(error)
         expect(isDisplayed('create-api-key-button')).toBe(createButton)
         // key counts are only shown with the new table (feature flag enabled)
         expect(isDisplayed('api-key-counts')).toBe(keyList && isCreateEnabled)

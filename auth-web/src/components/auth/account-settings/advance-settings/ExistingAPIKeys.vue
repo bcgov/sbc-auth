@@ -49,6 +49,17 @@
       </div>
     </v-alert>
 
+    <!-- Eligibility check failed alert -->
+    <v-alert
+      v-if="isEligibilityCheckErrorDisplayed"
+      class="api-eligibility-error-alert mb-7"
+      icon="mdi-alert"
+      data-test="api-eligibility-error"
+    >
+      <strong>Error</strong>: We were not able to check your eligibility to create API keys. Please refresh the
+      page and try again later.
+    </v-alert>
+
     <p
       v-if="isApiKeyListDisplayed && isCreateApiKeyEnabled"
       class="mb-6 mt-1"
@@ -523,6 +534,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       !this.isApiEligible
   }
 
+  get isEligibilityCheckErrorDisplayed (): boolean {
+    return this.isCreateApiKeyEnabled && !this.isEligibilityPending && this.isEligibilityCheckFailed
+  }
+
   get isCreateKeyAllowed (): boolean {
     return this.isCreateApiKeyEnabled && !this.isEligibilityPending && this.isApiEligible
   }
@@ -918,9 +933,22 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   border: 1px solid $BCgovGold5;
   background: $BCgovGold0;
   color: $gray7;
+  font-size: 14px;
 
   ::v-deep .v-icon {
     color: $app-alert-orange;
+  }
+}
+
+.v-alert.api-eligibility-error-alert {
+  border-radius: 4px;
+  border: 1px solid $app-red;
+  background: rgba($app-red, 0.1);
+  color: $gray7;
+  font-size: 14px;
+
+  ::v-deep .v-icon {
+    color: $app-red;
   }
 }
 
