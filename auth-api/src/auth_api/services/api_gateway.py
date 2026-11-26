@@ -37,7 +37,7 @@ from auth_api.utils.constants import (
     GROUP_API_GW_USERS,
     MAX_NAMED_API_KEYS,
 )
-from auth_api.utils.enums import ActivityAction
+from auth_api.utils.enums import ActivityAction, OrgStatus
 from auth_api.utils.roles import ADMIN, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -62,15 +62,21 @@ class ApiGateway:
         """
         current_app.logger.debug("<create_key ")
         user_from_context: UserContext = kwargs["user_context"]
-        if not user_from_context.is_system():
+        env = current_app.config.get("ENVIRONMENT_NAME")
+        is_system = user_from_context.is_system()
+        if not is_system:
             check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
             # system callers don't go through the UI terms page, so the terms are only enforced for UI users
             if not ApiTermsService.is_latest_accepted(org_id):
                 raise BusinessException(Error.API_TERMS_NOT_ACCEPTED, None)
-        env = current_app.config.get("ENVIRONMENT_NAME")
+        org: OrgModel = OrgModel.find_by_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # eligibility is only enforced for users creating api keys (skipped for system callers)
+        if not is_system and not cls._eligibility(org)["isApiEligible"]:
+            raise BusinessException(Error.API_ACCESS_NOT_ELIGIBLE, None)
         # accept keyName (deprecated) for existing callers
         name = request_json.get("apiKeyName") or request_json.get("keyName")
-        org: OrgModel = OrgModel.find_by_id(org_id)
         # first find if there is a consumer created for this account.
         gw_api_key = current_app.config.get("API_GW_KEY")
         email = cls._get_email_id(org_id, env)
@@ -305,11 +311,22 @@ class ApiGateway:
         return True
 
     @classmethod
-    def _get_pay_account(cls, org, user):
-        """Get the payment account for the org."""
-        pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
-        pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
-        return pay_account
+    def get_eligibility(cls, org_id: int) -> dict:
+        """Return whether the org is eligible for api access."""
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        org: OrgModel = OrgModel.find_by_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        return cls._eligibility(org)
+
+    @classmethod
+    def _eligibility(cls, org: OrgModel) -> dict:
+        """Return the org's eligibility, it has to be active."""
+        is_account_active = org.status_code == OrgStatus.ACTIVE.value
+        return {
+            "isApiEligible": is_account_active,
+            "isAccountActive": is_account_active,
+        }
 
     @classmethod
     def _make_string_compatible(cls, target: str) -> str:
