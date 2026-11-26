@@ -42,6 +42,7 @@
 
     <v-alert
       v-if="acceptErrorMessage"
+      ref="acceptErrorAlert"
       outlined
       color="error"
       icon="mdi-alert"
@@ -107,14 +108,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { computed, defineComponent, nextTick, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import DocumentService from '@/services/document.services'
 import { useOrgStore } from '@/stores/org'
 
 const API_TERMS_DOCUMENT_TYPE = 'termsofuse_api'
 const TERMS_LOAD_FAILED_MESSAGE = 'We were not able to load the terms of use. Please refresh the page or try again later.'
 const TERMS_VERSION_MISMATCH_MESSAGE = 'The API Terms of Use have been updated. Please refresh the page to review the latest version.'
-const TERMS_ACCEPT_FAILED_MESSAGE = 'The API Terms of Use could not be accepted. Please try again.'
+const TERMS_ACCEPT_FAILED_MESSAGE = 'The API Terms of Use could not be accepted. Please refresh the page and try again.'
 
 export default defineComponent({
   name: 'ApiTermsOfUse',
@@ -134,6 +135,8 @@ export default defineComponent({
       termsVersionId: '',
       acceptErrorMessage: ''
     })
+
+    const acceptErrorAlert = ref(null)
 
     const developerAccessUrl = computed(() => `/account/${props.orgId}/settings/developer-access`)
 
@@ -170,6 +173,9 @@ export default defineComponent({
         state.acceptErrorMessage = e?.response?.data?.code === 'API_TERMS_VERSION_MISMATCH'
           ? TERMS_VERSION_MISMATCH_MESSAGE
           : TERMS_ACCEPT_FAILED_MESSAGE
+        // scroll up to the error
+        await nextTick()
+        acceptErrorAlert.value?.$el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       } finally {
         state.isAccepting = false
       }
@@ -177,6 +183,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      acceptErrorAlert,
       developerAccessUrl,
       accept
     }
