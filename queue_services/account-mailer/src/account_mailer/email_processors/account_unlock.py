@@ -45,7 +45,7 @@ def process(data: dict, token: str) -> dict:
 
 
 def _get_account_unlock_email(data):
-    org_id = data.get("accountId")
+    org_id = data.get("org_id")
     _, account_name_with_branch = get_account_info(org_id)
     filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), data.get("template_name"))
     jnja_template = Template(filled_template, autoescape=True)

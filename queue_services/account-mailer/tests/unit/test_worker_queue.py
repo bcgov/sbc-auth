@@ -263,8 +263,11 @@ def test_unlock_account_mailer_queue(app, session, client, additional_emails, ex
                 == SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             )
             assert mock_send.call_args.args[0].get("attachments") is None
-            assert mock_send.call_args.args[0].get("content").get("body") is not None
-            assert True
+            body = mock_send.call_args.args[0].get("content").get("body")
+            assert body is not None
+            # The account number and name must be filled in, not rendered as "None: None".
+            assert f"{id}: {org.name}" in body
+            assert "None" not in body
 
 
 def test_account_conf_mailer_queue(app, session, client):
