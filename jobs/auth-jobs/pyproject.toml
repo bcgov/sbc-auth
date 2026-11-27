@@ -2,7 +2,7 @@
 name = "auth-jobs"
 version = "3.1.1"
 description = ""
-authors = ["BC Registries and Online Services"]
+authors = ["BCROS <BCRegistries@gov.bc.ca>"]
 readme = "README.md"
 package-mode = false
 

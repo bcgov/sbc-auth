@@ -2,7 +2,7 @@
 name = "account-mailer"
 version = "3.1.1"
 description = ""
-authors = [{ name = "SBC Connect Team & Pay Team & SRE Team" }]
+authors = [{ name = "BCROS", email = "BCRegistries@gov.bc.ca" }]
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
