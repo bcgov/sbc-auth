@@ -45,6 +45,14 @@ describe('ApiTermsOfUse.vue', () => {
     await flushPromises()
   }
 
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = vi.fn()
+  })
+
+  afterAll(() => {
+    delete (Element.prototype as any).scrollIntoView
+  })
+
   beforeEach(() => {
     getTermsOfService = vi.spyOn(DocumentService, 'getTermsOfService')
       .mockResolvedValue({ data: { versionId: 'k01', content: '<p>The API terms</p>' } } as any)
@@ -118,9 +126,13 @@ describe('ApiTermsOfUse.vue', () => {
     [
       'the terms are missing on the server',
       httpError({ data: { code: 'API_TERMS_NOT_FOUND' } }),
-      'The API Terms of Use could not be accepted. Please try again.'
+      'The API Terms of Use could not be accepted. Please refresh the page and try again.'
     ],
-    ['accepting fails for another reason', new Error('network error'), 'The API Terms of Use could not be accepted. Please try again.']
+    [
+      'accepting fails for another reason',
+      new Error('network error'),
+      'The API Terms of Use could not be accepted. Please refresh the page and try again.'
+    ]
   ])('shows an error and stays on the page when %s', async (_, error, message) => {
     acceptApiTerms.mockRejectedValue(error)
     await mountAndLoad()

@@ -9,6 +9,7 @@
           {{ apiKeysTitle }}
         </h2>
         <p
+          v-if="isCreateApiKeyEnabled"
           class="mb-0 mt-1"
           data-test="api-key-counts"
         >
@@ -130,6 +131,7 @@
       <v-data-table
         v-if="!isCreateApiKeyEnabled"
         class="apikey-list"
+        data-test="api-key-table"
         :headers="legacyActivityHeader"
         :items="apiKeyList"
         no-data-text="No API Keys"
@@ -170,6 +172,7 @@
       <v-data-table
         v-else
         class="apikey-list mb-10"
+        data-test="api-key-table"
         :headers="activityHeader"
         :items="apiKeyList"
         item-key="apiKey"
@@ -613,7 +616,10 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.isLoading = true
     this.apiKeyList = []
     try {
-      const resp = await this.getOrgApiKeys(this.currentOrganization.id, true)
+      // legacy table (when feature flag off) should load only active keys
+      // new table (feature flag on) will load all api keys, active and revoked
+      const shouldShowAllKeys = this.isCreateApiKeyEnabled
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id, shouldShowAllKeys)
       this.apiKeyList = resp?.consumer?.consumerKey || []
       this.maxNamedKeys = resp?.maxNamedKeys ?? null
       this.isLoading = false
@@ -868,6 +874,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 }
 .masked-key {
   margin: -10px 0;
+  min-height: 44px;
 }
 
 .copy-key-btn.v-btn--icon {
