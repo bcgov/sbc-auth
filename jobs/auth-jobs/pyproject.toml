@@ -1,9 +1,11 @@
-[tool.poetry]
+[project]
 name = "auth-jobs"
 version = "3.1.1"
 description = ""
-authors = ["BC Registries and Online Services"]
+authors = [{ name = "BCROS", email = "BCRegistries@gov.bc.ca" }]
 readme = "README.md"
+
+[tool.poetry]
 package-mode = false
 
 [tool.poetry.dependencies]
